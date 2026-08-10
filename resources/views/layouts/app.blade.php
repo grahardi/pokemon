@@ -114,6 +114,27 @@
             position: relative;
         }
         .hero-caption { max-width: 640px; }
+
+        /* Breadcrumb di atas hero berwarna (perlu kontras tinggi di semua warna tipe) */
+        .hero-breadcrumb {
+            display: inline-flex;
+            background: rgba(0,0,0,.35);
+            backdrop-filter: blur(2px);
+            padding: .35rem .75rem;
+            border-radius: .5rem;
+        }
+        .hero-breadcrumb a {
+            color: rgba(255,255,255,.9);
+            text-decoration: none;
+        }
+        .hero-breadcrumb a:hover { color: #fff; text-decoration: underline; }
+        .hero-breadcrumb .breadcrumb-item.active {
+            color: #fff;
+            font-weight: 600;
+        }
+        .hero-breadcrumb .breadcrumb-item + .breadcrumb-item::before {
+            color: rgba(255,255,255,.6);
+        }
         .hero-title { text-shadow: 0 2px 10px rgba(0,0,0,.45); }
         #heroSlider .carousel-control-prev,
         #heroSlider .carousel-control-next { width: 5%; opacity: .7; }

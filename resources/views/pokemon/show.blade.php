@@ -18,10 +18,10 @@
 
 <div class="py-4" style="background: linear-gradient(135deg, {{ $primaryColor }}, #222 220%);">
     <div class="container">
-        <nav aria-label="breadcrumb">
-            <ol class="breadcrumb small">
-                <li class="breadcrumb-item"><a href="{{ route('pokemon.index') }}" class="text-white-50">Katalog</a></li>
-                <li class="breadcrumb-item active text-white" aria-current="page">{{ $pokemon->name }}</li>
+        <nav aria-label="breadcrumb" class="mb-2">
+            <ol class="breadcrumb small hero-breadcrumb mb-0">
+                <li class="breadcrumb-item"><a href="{{ route('pokemon.index') }}">Katalog</a></li>
+                <li class="breadcrumb-item active" aria-current="page">{{ $pokemon->name }}</li>
             </ol>
         </nav>
         <div class="row align-items-center text-white">
