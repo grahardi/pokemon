@@ -6,7 +6,7 @@ Dibangun dengan **Laravel 13**, **PostgreSQL**, dan **Bootstrap 5** (CDN, tanpa 
 
 ## Fitur
 
-- **Katalog Pokemon** (`/katalog`) — pencarian nama/nomor dex, filter tipe & generasi (Gen 1–8), detail lengkap (stats, generasi, kategori/genus, tinggi, berat, gambar official artwork), navigasi Pokemon sebelum/sesudah.
+- **Katalog Pokemon** (`/katalog`) — pencarian nama/nomor dex, filter tipe & generasi (Gen 1–8), detail lengkap (stats, generasi, kategori/genus, tinggi, berat, kelemahan tipe otomatis, rantai evolusi, gambar official artwork), navigasi Pokemon sebelum/sesudah.
 - **Berita** (`/berita`) — artikel berita & info seputar Pokemon.
 - **Game** (`/game`) — daftar game utama Pokemon dari Gen 1–9 + Pokemon GO.
 - **Beranda** (`/`) — hero slider, Pokemon pilihan acak, berita terbaru.

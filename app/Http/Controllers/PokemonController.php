@@ -48,6 +48,46 @@ class PokemonController extends Controller
         $prev = Pokemon::where('dex_number', '<', $pokemon->dex_number)->orderByDesc('dex_number')->first();
         $next = Pokemon::where('dex_number', '>', $pokemon->dex_number)->orderBy('dex_number')->first();
 
-        return view('pokemon.show', compact('pokemon', 'prev', 'next'));
+        $evolutions = $this->buildEvolutionChain($pokemon);
+
+        return view('pokemon.show', compact('pokemon', 'prev', 'next', 'evolutions'));
+    }
+
+    /**
+     * Susun rantai evolusi jadi array bertingkat (stage), tiap stage berisi
+     * satu atau lebih Pokemon (untuk kasus evolusi bercabang seperti Eevee).
+     *
+     * @return array<int, \Illuminate\Support\Collection>
+     */
+    private function buildEvolutionChain(Pokemon $pokemon): array
+    {
+        if (! $pokemon->evolution_chain_id) {
+            return [];
+        }
+
+        $family = Pokemon::where('evolution_chain_id', $pokemon->evolution_chain_id)
+            ->orderBy('dex_number')
+            ->get(['id', 'dex_number', 'slug', 'name', 'types', 'evolves_from', 'image_url']);
+
+        if ($family->count() < 2) {
+            return [];
+        }
+
+        $stages = [];
+        $current = $family->whereNull('evolves_from')->values();
+        $seen = [];
+
+        while ($current->isNotEmpty()) {
+            $stages[] = $current;
+            foreach ($current as $p) {
+                $seen[$p->dex_number] = true;
+            }
+
+            $current = $family->filter(
+                fn ($p) => in_array($p->evolves_from, array_keys($seen), true) && ! isset($seen[$p->dex_number])
+            )->values();
+        }
+
+        return $stages;
     }
 }

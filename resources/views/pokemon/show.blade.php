@@ -60,7 +60,7 @@
 
 <div class="container py-5">
     <div class="row">
-        <div class="col-lg-8">
+        <div class="col-lg-7">
             <div class="card border-0 shadow-sm mb-4">
                 <div class="card-body">
                     <h5 class="card-title mb-3">Statistik Dasar</h5>
@@ -81,29 +81,92 @@
                     </div>
                 </div>
             </div>
+
+            @if (count($pokemon->weaknesses) > 0)
+                <div class="card border-0 shadow-sm">
+                    <div class="card-body">
+                        <h5 class="card-title mb-3">Kelemahan Tipe</h5>
+                        <p class="text-muted small mb-3">Tipe serangan berikut memberi damage lebih besar ke {{ $pokemon->name }}:</p>
+                        <div class="d-flex flex-wrap gap-2">
+                            @foreach ($pokemon->weaknesses as $w)
+                                <span class="type-badge fs-6 d-inline-flex align-items-center gap-1" style="background-color: {{ $colors[$w['type']] ?? '#777' }}">
+                                    {{ $w['type'] }}
+                                    <small class="opacity-75">{{ rtrim(rtrim(number_format($w['multiplier'], 1), '0'), '.') }}x</small>
+                                </span>
+                            @endforeach
+                        </div>
+                    </div>
+                </div>
+            @endif
         </div>
-        <div class="col-lg-4">
-            <div class="card border-0 shadow-sm">
+
+        <div class="col-lg-5">
+            <div class="card border-0 shadow-sm info-cepat-card">
                 <div class="card-body">
-                    <h6 class="card-title">Info Cepat</h6>
-                    <ul class="list-unstyled small mb-0">
-                        <li class="mb-2"><strong>Nomor Dex:</strong> {{ $pokemon->formatted_dex }}</li>
-                        <li class="mb-2"><strong>Generasi:</strong> {{ $pokemon->generation_label }}</li>
+                    <h6 class="card-title text-white-50 text-uppercase small fw-bold mb-3" style="letter-spacing:.5px">Info Cepat</h6>
+                    <div class="row gy-3">
+                        <div class="col-6">
+                            <div class="text-white-50 small">Nomor Dex</div>
+                            <div class="fw-bold">{{ $pokemon->formatted_dex }}</div>
+                        </div>
+                        <div class="col-6">
+                            <div class="text-white-50 small">Generasi</div>
+                            <div class="fw-bold">{{ $pokemon->generation_label }}</div>
+                        </div>
                         @if ($pokemon->genus)
-                            <li class="mb-2"><strong>Kategori:</strong> {{ $pokemon->genus }}</li>
+                            <div class="col-6">
+                                <div class="text-white-50 small">Kategori</div>
+                                <div class="fw-bold">{{ $pokemon->genus }}</div>
+                            </div>
                         @endif
-                        <li class="mb-2"><strong>Tipe:</strong> {{ implode(' / ', $pokemon->types) }}</li>
+                        <div class="col-6">
+                            <div class="text-white-50 small">Tipe</div>
+                            <div class="fw-bold">{{ implode(' / ', $pokemon->types) }}</div>
+                        </div>
                         @if ($pokemon->height_m)
-                            <li class="mb-2"><strong>Tinggi:</strong> {{ number_format($pokemon->height_m, 1) }} m</li>
+                            <div class="col-6">
+                                <div class="text-white-50 small">Tinggi</div>
+                                <div class="fw-bold">{{ number_format($pokemon->height_m, 1) }} m</div>
+                            </div>
                         @endif
                         @if ($pokemon->weight_kg)
-                            <li class="mb-2"><strong>Berat:</strong> {{ number_format($pokemon->weight_kg, 1) }} kg</li>
+                            <div class="col-6">
+                                <div class="text-white-50 small">Berat</div>
+                                <div class="fw-bold">{{ number_format($pokemon->weight_kg, 1) }} kg</div>
+                            </div>
                         @endif
-                        <li><strong>Total Stat Dasar:</strong> {{ $pokemon->total_stats }}</li>
-                    </ul>
+                        <div class="col-6">
+                            <div class="text-white-50 small">Total Stat Dasar</div>
+                            <div class="fw-bold">{{ $pokemon->total_stats }}</div>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
     </div>
+
+    @if (count($evolutions) > 1)
+        <div class="evolution-panel mt-4 p-4 p-md-5">
+            <h5 class="text-white mb-4">Evolusi</h5>
+            <div class="d-flex align-items-center justify-content-center flex-wrap gap-3">
+                @foreach ($evolutions as $i => $stage)
+                    @if ($i > 0)
+                        <div class="evo-arrow"><i class="bi bi-chevron-right"></i></div>
+                    @endif
+                    <div class="d-flex gap-3 flex-wrap justify-content-center">
+                        @foreach ($stage as $p)
+                            <a href="{{ route('pokemon.show', $p->slug) }}" class="evo-item text-decoration-none text-center">
+                                <div class="evo-circle {{ $p->id === $pokemon->id ? 'evo-circle--active' : '' }}">
+                                    <img src="{{ $p->display_image }}" alt="{{ $p->name }}">
+                                </div>
+                                <div class="text-white small fw-semibold mt-2">{{ $p->name }}</div>
+                                <div class="text-white-50" style="font-size:.75rem">{{ '#' . str_pad($p->dex_number, 3, '0', STR_PAD_LEFT) }}</div>
+                            </a>
+                        @endforeach
+                    </div>
+                @endforeach
+            </div>
+        </div>
+    @endif
 </div>
 @endsection

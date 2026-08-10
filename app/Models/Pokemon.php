@@ -11,7 +11,7 @@ class Pokemon extends Model
 
     protected $table = 'pokemons';
 
-    protected $appends = ['display_image', 'generation_label'];
+    protected $appends = ['display_image', 'generation_label', 'weaknesses'];
 
     protected $fillable = [
         'dex_number',
@@ -23,6 +23,8 @@ class Pokemon extends Model
         'genus',
         'height_m',
         'weight_kg',
+        'evolution_chain_id',
+        'evolves_from',
         'hp',
         'attack',
         'defense',
@@ -58,6 +60,41 @@ class Pokemon extends Model
         $region = $regions[$this->generation] ?? '';
 
         return "Gen {$this->generation}" . ($region ? " ({$region})" : '');
+    }
+
+    /**
+     * Hitung kelemahan tipe (attacking type yang memberi damage >1x)
+     * berdasarkan kombinasi tipe Pokemon ini, memakai chart di config/pokemon.php.
+     *
+     * @return array<int, array{type: string, multiplier: float}>
+     */
+    public function getWeaknessesAttribute(): array
+    {
+        $chart = config('pokemon.chart', []);
+        $defenderTypes = $this->types ?? [];
+        $results = [];
+
+        foreach ($chart as $attackType => $rules) {
+            $multiplier = 1.0;
+
+            foreach ($defenderTypes as $defType) {
+                if (in_array($defType, $rules['double'] ?? [], true)) {
+                    $multiplier *= 2;
+                } elseif (in_array($defType, $rules['half'] ?? [], true)) {
+                    $multiplier *= 0.5;
+                } elseif (in_array($defType, $rules['none'] ?? [], true)) {
+                    $multiplier *= 0;
+                }
+            }
+
+            if ($multiplier > 1) {
+                $results[] = ['type' => $attackType, 'multiplier' => $multiplier];
+            }
+        }
+
+        usort($results, fn ($a, $b) => $b['multiplier'] <=> $a['multiplier']);
+
+        return $results;
     }
 
     /**

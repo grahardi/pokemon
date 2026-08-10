@@ -51,6 +51,38 @@
         .stat-bar { height: .5rem; border-radius: .5rem; background: #e5e7eb; overflow: hidden; }
         .stat-bar > div { height: 100%; }
 
+        /* Info Cepat card */
+        .info-cepat-card {
+            background: linear-gradient(135deg, #3B82F6, #2563EB);
+            color: #fff;
+        }
+        .info-cepat-card .text-white-50 { color: rgba(255,255,255,.75) !important; }
+
+        /* Evolution panel */
+        .evolution-panel {
+            background: repeating-linear-gradient(135deg, #374151, #374151 10px, #3f4756 10px, #3f4756 20px);
+            border-radius: 1rem;
+        }
+        .evo-circle {
+            width: 96px;
+            height: 96px;
+            border-radius: 50%;
+            background: rgba(255,255,255,.12);
+            border: 3px solid rgba(255,255,255,.6);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 8px;
+            transition: transform .15s ease, border-color .15s ease;
+        }
+        .evo-circle img { width: 100%; height: 100%; object-fit: contain; }
+        .evo-item:hover .evo-circle { transform: translateY(-4px); border-color: #fff; }
+        .evo-circle--active { border-color: var(--brand-yellow); background: rgba(255,203,5,.15); }
+        .evo-arrow { color: rgba(255,255,255,.6); font-size: 1.5rem; }
+        @media (max-width: 575.98px) {
+            .evo-circle { width: 72px; height: 72px; }
+        }
+
         /* Hero slider */
         #heroSlider { margin-top: -1px; }
         .hero-slide {
