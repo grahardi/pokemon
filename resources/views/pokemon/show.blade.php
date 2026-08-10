@@ -58,6 +58,16 @@
     </div>
 </div>
 
+@if ($pokemon->description)
+    <div class="container pt-4">
+        <div class="card border-0 shadow-sm">
+            <div class="card-body">
+                <p class="mb-0">{{ $pokemon->description }}</p>
+            </div>
+        </div>
+    </div>
+@endif
+
 <div class="container py-5">
     <div class="row">
         <div class="col-lg-7">

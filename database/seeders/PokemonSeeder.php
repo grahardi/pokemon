@@ -53,7 +53,7 @@ class PokemonSeeder extends Seeder
                 'sp_attack' => $item['sp_attack'],
                 'sp_defense' => $item['sp_defense'],
                 'speed' => $item['speed'],
-                'description' => null,
+                'description' => $item['description'] ?? null,
                 'image_url' => sprintf(
                     'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/%d.png',
                     $item['dex_number']
@@ -68,7 +68,7 @@ class PokemonSeeder extends Seeder
             Pokemon::query()->upsert(
                 $chunk,
                 ['dex_number'],
-                ['slug', 'name', 'name_japanese', 'types', 'generation', 'genus', 'height_m', 'weight_kg', 'evolution_chain_id', 'evolves_from', 'abilities', 'moves_level', 'moves_machine', 'hp', 'attack', 'defense', 'sp_attack', 'sp_defense', 'speed', 'image_url', 'updated_at']
+                ['slug', 'name', 'name_japanese', 'types', 'generation', 'genus', 'height_m', 'weight_kg', 'evolution_chain_id', 'evolves_from', 'abilities', 'moves_level', 'moves_machine', 'description', 'hp', 'attack', 'defense', 'sp_attack', 'sp_defense', 'speed', 'image_url', 'updated_at']
             );
         }
 
