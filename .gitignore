@@ -25,3 +25,7 @@ _ide_helper.php
 Homestead.json
 Homestead.yaml
 Thumbs.db
+
+# Cache gambar Pokemon (di-generate via: php artisan pokemon:cache-images)
+/public/images/pokemon/*
+!/public/images/pokemon/.gitkeep

@@ -26,7 +26,7 @@
         </nav>
         <div class="row align-items-center text-white">
             <div class="col-md-4 text-center">
-                <img src="{{ $pokemon->image_url }}" alt="{{ $pokemon->name }}" class="img-fluid" style="max-height: 260px; filter: drop-shadow(0 10px 15px rgba(0,0,0,.3));">
+                <img src="{{ $pokemon->display_image }}" alt="{{ $pokemon->name }}" class="img-fluid" style="max-height: 260px; filter: drop-shadow(0 10px 15px rgba(0,0,0,.3));">
             </div>
             <div class="col-md-8">
                 <div class="dex-number text-white-50">{{ $pokemon->formatted_dex }}</div>

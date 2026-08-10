@@ -41,7 +41,7 @@ export default function Index({ pokemons, filters }) {
                             <tr key={p.id}>
                                 <td className="px-4 py-3 text-slate-400">#{String(p.dex_number).padStart(3, '0')}</td>
                                 <td className="px-4 py-3">
-                                    <img src={p.image_url} alt={p.name} className="w-10 h-10 object-contain" loading="lazy" />
+                                    <img src={p.display_image} alt={p.name} className="w-10 h-10 object-contain" loading="lazy" />
                                 </td>
                                 <td className="px-4 py-3 font-medium text-slate-800">{p.name}</td>
                                 <td className="px-4 py-3 text-slate-500">{p.types.join(' / ')}</td>

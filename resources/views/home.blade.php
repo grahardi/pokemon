@@ -64,7 +64,9 @@
 <div class="container py-5">
     <div class="d-flex justify-content-between align-items-center mb-4">
         <h2 class="h4 mb-0">Pokemon Pilihan</h2>
-        <a href="{{ route('pokemon.index') }}" class="small">Lihat semua katalog &rarr;</a>
+        <a href="{{ route('pokemon.index') }}" class="btn btn-sm btn-outline-danger rounded-pill fw-semibold px-3">
+            Lihat Semua Katalog <i class="bi bi-arrow-right"></i>
+        </a>
     </div>
     <div class="row g-3">
         @foreach ($featuredPokemon as $pokemon)
@@ -76,7 +78,9 @@
 <div class="container pb-5">
     <div class="d-flex justify-content-between align-items-center mb-4">
         <h2 class="h4 mb-0">Berita Terbaru</h2>
-        <a href="{{ route('news.index') }}" class="small">Semua berita &rarr;</a>
+        <a href="{{ route('news.index') }}" class="btn btn-sm btn-outline-danger rounded-pill fw-semibold px-3">
+            Semua Berita <i class="bi bi-arrow-right"></i>
+        </a>
     </div>
     <div class="row g-4">
         @forelse ($latestNews as $news)
@@ -86,7 +90,7 @@
                         <span class="badge bg-danger mb-2">{{ $news->category }}</span>
                         <h5 class="card-title"><a href="{{ route('news.show', $news) }}" class="text-decoration-none text-dark">{{ $news->title }}</a></h5>
                         <p class="card-text small text-muted">{{ $news->excerpt }}</p>
-                        <a href="{{ route('news.show', $news) }}" class="small">Baca selengkapnya &rarr;</a>
+                        <a href="{{ route('news.show', $news) }}" class="small fw-semibold text-danger text-decoration-none">Baca selengkapnya <i class="bi bi-arrow-right"></i></a>
                     </div>
                 </div>
             </div>

@@ -11,6 +11,8 @@ class Pokemon extends Model
 
     protected $table = 'pokemons';
 
+    protected $appends = ['display_image'];
+
     protected $fillable = [
         'dex_number',
         'slug',
@@ -40,6 +42,22 @@ class Pokemon extends Model
     public function getFormattedDexAttribute(): string
     {
         return '#' . str_pad((string) $this->dex_number, 3, '0', STR_PAD_LEFT);
+    }
+
+    /**
+     * Kembalikan gambar lokal (cache) kalau sudah di-download lewat
+     * `php artisan pokemon:cache-images`, kalau belum fallback ke CDN GitHub.
+     */
+    public function getDisplayImageAttribute(): ?string
+    {
+        foreach (['webp', 'png'] as $ext) {
+            $localPath = "images/pokemon/{$this->dex_number}.{$ext}";
+            if (file_exists(public_path($localPath))) {
+                return asset($localPath);
+            }
+        }
+
+        return $this->image_url;
     }
 
     public function getRouteKeyName(): string

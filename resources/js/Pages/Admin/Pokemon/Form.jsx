@@ -33,7 +33,7 @@ export default function Form({ pokemon }) {
         <AdminLayout title={`Edit Pokemon — ${pokemon.name}`}>
             <form onSubmit={submit} className="bg-white rounded-xl shadow p-6 max-w-2xl space-y-5">
                 <div className="flex items-center gap-4">
-                    <img src={data.image_url} alt={pokemon.name} className="w-20 h-20 object-contain bg-slate-50 rounded-lg" />
+                    <img src={pokemon.display_image} alt={pokemon.name} className="w-20 h-20 object-contain bg-slate-50 rounded-lg" />
                     <div className="text-sm text-slate-500">#{String(pokemon.dex_number).padStart(3, '0')} &middot; {pokemon.types.join(' / ')}</div>
                 </div>
 

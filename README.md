@@ -76,6 +76,21 @@ Data seed katalog ada di `database/seeders/data/pokedex.json` (809 entri: nama, 
 php artisan db:seed --class=PokemonSeeder --force
 ```
 
+## Cache gambar Pokemon secara lokal (opsional, direkomendasikan)
+
+Secara default, gambar Pokemon di-load langsung dari `raw.githubusercontent.com` (CDN GitHub). Supaya situs lebih cepat dan tidak bergantung ke server luar, jalankan command berikut di server untuk men-download semua 809 gambar ke lokal (otomatis dikompres ke WebP, max lebar 400px):
+
+```bash
+php artisan pokemon:cache-images
+```
+
+- Gambar disimpan di `public/images/pokemon/{dex_number}.webp` — **tidak ikut masuk ke git repo** (sudah di-gitignore), jadi tiap server perlu jalankan command ini sendiri.
+- Situs otomatis pakai gambar lokal begitu tersedia, dan fallback ke CDN GitHub kalau belum di-cache — jadi aman dijalankan kapan saja tanpa bikin situs down.
+- Command otomatis skip gambar yang sudah ada. Tambahkan `--force` untuk download ulang semua.
+- Untuk retry sebagian: `php artisan pokemon:cache-images --only=1,4,7,150`
+- Butuh ekstensi PHP **GD** untuk kompresi WebP (biasanya sudah aktif di aaPanel). Kalau tidak ada, otomatis fallback simpan sebagai PNG asli.
+- Proses ini butuh waktu beberapa menit (809 request ke GitHub) — jalankan sekali saja, lalu cukup ulangi kalau ada Pokemon baru ditambahkan.
+
 ## Struktur utama
 
 - `app/Models/{Pokemon,News,Game}.php`
