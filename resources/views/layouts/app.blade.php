@@ -5,6 +5,14 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>@yield('title', 'Pokemon.id') - Berita, Info & Katalog Pokemon</title>
     <meta name="description" content="Pokemon.id — portal berita, info seputar game, dan katalog lengkap Pokemon berbahasa Indonesia.">
+
+    <link rel="icon" href="{{ asset('favicon.ico') }}" sizes="any">
+    <link rel="icon" type="image/svg+xml" href="{{ asset('images/pokeball-logo.svg') }}">
+    <link rel="icon" type="image/png" sizes="32x32" href="{{ asset('images/favicon-32.png') }}">
+    <link rel="icon" type="image/png" sizes="16x16" href="{{ asset('images/favicon-16.png') }}">
+    <link rel="apple-touch-icon" href="{{ asset('apple-touch-icon.png') }}">
+    <link rel="icon" type="image/png" sizes="192x192" href="{{ asset('images/android-chrome-192.png') }}">
+    <link rel="icon" type="image/png" sizes="512x512" href="{{ asset('images/android-chrome-512.png') }}">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
     <style>
@@ -71,7 +79,8 @@
     <nav class="navbar navbar-expand-lg navbar-pokemon sticky-top shadow-sm">
         <div class="container">
             <a class="navbar-brand" href="{{ route('home') }}">
-                <i class="bi bi-circle-half"></i> Pokemon<span class="dot-y">.id</span>
+                <img src="{{ asset('images/pokeball-logo.svg') }}" alt="" width="26" height="26" class="me-1" style="vertical-align: -5px;">
+                Pokemon<span class="dot-y">.id</span>
             </a>
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navMain">
                 <span class="navbar-toggler-icon"></span>

@@ -4,6 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Login Admin - Pokemon.id</title>
+    <link rel="icon" href="{{ asset('favicon.ico') }}" sizes="any">
+    <link rel="icon" type="image/svg+xml" href="{{ asset('images/pokeball-logo.svg') }}">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <style>
         body {
@@ -22,6 +24,7 @@
                 <div class="card login-card shadow-lg mx-auto">
                     <div class="card-body p-4">
                         <div class="text-center mb-4">
+                            <img src="{{ asset('images/pokeball-logo.svg') }}" alt="" width="40" height="40" class="mb-2">
                             <h4 class="fw-bold mb-0">Pokemon<span style="color:#DC0A2D">.id</span></h4>
                             <p class="text-muted small">Panel Admin</p>
                         </div>
