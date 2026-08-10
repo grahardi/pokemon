@@ -7,7 +7,7 @@
     <meta name="description" content="Pokemon.id — portal berita, info seputar game, dan katalog lengkap Pokemon berbahasa Indonesia.">
 
     <link rel="icon" href="{{ asset('favicon.ico') }}" sizes="any">
-    <link rel="icon" type="image/svg+xml" href="{{ asset('images/pokeball-logo.svg') }}">
+    <link rel="icon" type="image/png" href="{{ asset('images/pokeball-logo.png') }}">
     <link rel="icon" type="image/png" sizes="32x32" href="{{ asset('images/favicon-32.png') }}">
     <link rel="icon" type="image/png" sizes="16x16" href="{{ asset('images/favicon-16.png') }}">
     <link rel="apple-touch-icon" href="{{ asset('apple-touch-icon.png') }}">
@@ -79,7 +79,7 @@
     <nav class="navbar navbar-expand-lg navbar-pokemon sticky-top shadow-sm">
         <div class="container">
             <a class="navbar-brand" href="{{ route('home') }}">
-                <img src="{{ asset('images/pokeball-logo.svg') }}" alt="" width="26" height="26" class="me-1" style="vertical-align: -5px;">
+                <img src="{{ asset('images/pokeball-logo.png') }}" alt="" width="26" height="26" class="me-1" style="vertical-align: -5px;">
                 Pokemon<span class="dot-y">.id</span>
             </a>
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navMain">
