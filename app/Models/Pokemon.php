@@ -25,6 +25,9 @@ class Pokemon extends Model
         'weight_kg',
         'evolution_chain_id',
         'evolves_from',
+        'abilities',
+        'moves_level',
+        'moves_machine',
         'hp',
         'attack',
         'defense',
@@ -37,6 +40,9 @@ class Pokemon extends Model
 
     protected $casts = [
         'types' => 'array',
+        'abilities' => 'array',
+        'moves_level' => 'array',
+        'moves_machine' => 'array',
     ];
 
     public function getTotalStatsAttribute(): int
@@ -90,6 +96,39 @@ class Pokemon extends Model
             if ($multiplier > 1) {
                 $results[] = ['type' => $attackType, 'multiplier' => $multiplier];
             }
+        }
+
+        usort($results, fn ($a, $b) => $b['multiplier'] <=> $a['multiplier']);
+
+        return $results;
+    }
+
+    /**
+     * Sama seperti weaknesses, tapi mengembalikan semua 18 tipe menyerang
+     * beserta multiplier-nya (termasuk yang netral 1x, resist, dan immune).
+     *
+     * @return array<int, array{type: string, multiplier: float}>
+     */
+    public function getTypeDefensesAttribute(): array
+    {
+        $chart = config('pokemon.chart', []);
+        $defenderTypes = $this->types ?? [];
+        $results = [];
+
+        foreach ($chart as $attackType => $rules) {
+            $multiplier = 1.0;
+
+            foreach ($defenderTypes as $defType) {
+                if (in_array($defType, $rules['double'] ?? [], true)) {
+                    $multiplier *= 2;
+                } elseif (in_array($defType, $rules['half'] ?? [], true)) {
+                    $multiplier *= 0.5;
+                } elseif (in_array($defType, $rules['none'] ?? [], true)) {
+                    $multiplier *= 0;
+                }
+            }
+
+            $results[] = ['type' => $attackType, 'multiplier' => $multiplier];
         }
 
         usort($results, fn ($a, $b) => $b['multiplier'] <=> $a['multiplier']);

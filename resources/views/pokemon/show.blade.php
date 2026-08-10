@@ -82,22 +82,46 @@
                 </div>
             </div>
 
-            @if (count($pokemon->weaknesses) > 0)
-                <div class="card border-0 shadow-sm">
+            @if (count($pokemon->abilities) > 0)
+                <div class="card border-0 shadow-sm mb-4">
                     <div class="card-body">
-                        <h5 class="card-title mb-3">Kelemahan Tipe</h5>
-                        <p class="text-muted small mb-3">Tipe serangan berikut memberi damage lebih besar ke {{ $pokemon->name }}:</p>
-                        <div class="d-flex flex-wrap gap-2">
-                            @foreach ($pokemon->weaknesses as $w)
-                                <span class="type-badge fs-6 d-inline-flex align-items-center gap-1" style="background-color: {{ $colors[$w['type']] ?? '#777' }}">
-                                    {{ $w['type'] }}
-                                    <small class="opacity-75">{{ rtrim(rtrim(number_format($w['multiplier'], 1), '0'), '.') }}x</small>
-                                </span>
+                        <h5 class="card-title mb-3">Kemampuan (Abilities)</h5>
+                        <div class="d-flex flex-column gap-3">
+                            @foreach ($pokemon->abilities as $ability)
+                                <div>
+                                    <div class="d-flex align-items-center gap-2 mb-1">
+                                        <span class="fw-bold">{{ $ability['name'] }}</span>
+                                        @if ($ability['hidden'])
+                                            <span class="badge bg-secondary">Hidden Ability</span>
+                                        @endif
+                                    </div>
+                                    <p class="text-muted small mb-0">{{ $ability['description'] }}</p>
+                                </div>
                             @endforeach
                         </div>
                     </div>
                 </div>
             @endif
+
+            <div class="card border-0 shadow-sm">
+                <div class="card-body">
+                    <h5 class="card-title mb-1">Ketahanan Tipe (Type Defense)</h5>
+                    <p class="text-muted small mb-3">Efektivitas tiap tipe serangan terhadap {{ $pokemon->name }}:</p>
+                    <div class="d-flex flex-wrap gap-2">
+                        @foreach ($pokemon->type_defenses as $td)
+                            @php
+                                $m = $td['multiplier'];
+                                $tone = $m == 0 ? 'defense-immune' : ($m > 1 ? 'defense-weak' : ($m < 1 ? 'defense-resist' : 'defense-neutral'));
+                                $label = $m == 0 ? '0x' : rtrim(rtrim(number_format($m, 2), '0'), '.') . 'x';
+                            @endphp
+                            <div class="defense-chip {{ $tone }}">
+                                <span class="type-badge" style="background-color: {{ $colors[$td['type']] ?? '#777' }}">{{ $td['type'] }}</span>
+                                <span class="defense-chip-mult">{{ $label }}</span>
+                            </div>
+                        @endforeach
+                    </div>
+                </div>
+            </div>
         </div>
 
         <div class="col-lg-5">
@@ -165,6 +189,89 @@
                         @endforeach
                     </div>
                 @endforeach
+            </div>
+        </div>
+    @endif
+
+    @if (count($pokemon->moves_level) > 0 || count($pokemon->moves_machine) > 0)
+        <div class="card border-0 shadow-sm mt-4">
+            <div class="card-body">
+                <h5 class="card-title mb-1">Daftar Skill (Moveset)</h5>
+                <p class="text-muted small mb-3">Skill yang bisa dipelajari {{ $pokemon->name }}, berdasarkan data game generasi terbaru yang tersedia.</p>
+
+                <ul class="nav nav-tabs mb-3" role="tablist">
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link active" data-bs-toggle="tab" data-bs-target="#moves-level" type="button">
+                            Lewat Level ({{ count($pokemon->moves_level) }})
+                        </button>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link" data-bs-toggle="tab" data-bs-target="#moves-machine" type="button">
+                            Lewat TM/TR ({{ count($pokemon->moves_machine) }})
+                        </button>
+                    </li>
+                </ul>
+
+                <div class="tab-content">
+                    <div class="tab-pane fade show active" id="moves-level" role="tabpanel">
+                        <div class="table-responsive">
+                            <table class="table table-sm table-hover align-middle">
+                                <thead>
+                                    <tr class="small text-muted">
+                                        <th>Level</th>
+                                        <th>Nama Skill</th>
+                                        <th>Tipe</th>
+                                        <th>Kategori</th>
+                                        <th>Power</th>
+                                        <th>Akurasi</th>
+                                        <th>PP</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach ($pokemon->moves_level as $move)
+                                        <tr>
+                                            <td class="small">{{ $move['level'] == 0 ? 'Awal' : $move['level'] }}</td>
+                                            <td class="fw-semibold small">{{ $move['name'] }}</td>
+                                            <td><span class="type-badge" style="background-color: {{ $colors[$move['type']] ?? '#777' }}">{{ $move['type'] }}</span></td>
+                                            <td class="small">{{ match($move['category']) { 'Physical' => 'Fisik', 'Special' => 'Spesial', default => 'Status' } }}</td>
+                                            <td class="small">{{ $move['power'] ?? '—' }}</td>
+                                            <td class="small">{{ $move['accuracy'] ? $move['accuracy'] . '%' : '—' }}</td>
+                                            <td class="small">{{ $move['pp'] ?? '—' }}</td>
+                                        </tr>
+                                    @endforeach
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                    <div class="tab-pane fade" id="moves-machine" role="tabpanel">
+                        <div class="table-responsive">
+                            <table class="table table-sm table-hover align-middle">
+                                <thead>
+                                    <tr class="small text-muted">
+                                        <th>Nama Skill</th>
+                                        <th>Tipe</th>
+                                        <th>Kategori</th>
+                                        <th>Power</th>
+                                        <th>Akurasi</th>
+                                        <th>PP</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach ($pokemon->moves_machine as $move)
+                                        <tr>
+                                            <td class="fw-semibold small">{{ $move['name'] }}</td>
+                                            <td><span class="type-badge" style="background-color: {{ $colors[$move['type']] ?? '#777' }}">{{ $move['type'] }}</span></td>
+                                            <td class="small">{{ match($move['category']) { 'Physical' => 'Fisik', 'Special' => 'Spesial', default => 'Status' } }}</td>
+                                            <td class="small">{{ $move['power'] ?? '—' }}</td>
+                                            <td class="small">{{ $move['accuracy'] ? $move['accuracy'] . '%' : '—' }}</td>
+                                            <td class="small">{{ $move['pp'] ?? '—' }}</td>
+                                        </tr>
+                                    @endforeach
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
     @endif

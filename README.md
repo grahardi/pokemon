@@ -6,7 +6,13 @@ Dibangun dengan **Laravel 13**, **PostgreSQL**, dan **Bootstrap 5** (CDN, tanpa 
 
 ## Fitur
 
-- **Katalog Pokemon** (`/katalog`) — pencarian nama/nomor dex, filter tipe & generasi (Gen 1–8), detail lengkap (stats, generasi, kategori/genus, tinggi, berat, kelemahan tipe otomatis, rantai evolusi, gambar official artwork), navigasi Pokemon sebelum/sesudah.
+- **Katalog Pokemon** (`/katalog`) — pencarian nama/nomor dex, filter tipe & generasi (Gen 1–8), detail lengkap (stats, generasi, kategori/genus, tinggi, berat, abilities dengan deskripsi Bahasa Indonesia, tabel Type Defense 18 tipe, moveset lengkap level-up & TM/TR, rantai evolusi, gambar official artwork), navigasi Pokemon sebelum/sesudah.
+
+### Catatan soal data Abilities & Moveset
+
+- **Abilities**: nama ability tetap Bahasa Inggris (istilah baku game, tidak ada lokalisasi resmi Bahasa Indonesia), tapi deskripsi efeknya ditulis ulang dalam Bahasa Indonesia (bukan terjemahan literal teks game, untuk menghindari isu hak cipta).
+- **Moveset**: diambil dari data mekanik game (nama skill, tipe, power, akurasi, PP — ini adalah data faktual, bukan teks kreatif) menggunakan versi game terakhir yang tersedia untuk tiap Pokemon di dataset sumber (PokeAPI/pokedex, hanya mencakup hingga Gen 8). Tidak mencakup egg moves atau tutor moves untuk menjaga scope tetap wajar.
+- **Sengaja tidak ada**: teks Pokedex resmi per game (flavor text) — itu teks kreatif berhak cipta Nintendo/Game Freak yang tidak direproduksi di situs ini.
 - **Berita** (`/berita`) — artikel berita & info seputar Pokemon.
 - **Game** (`/game`) — daftar game utama Pokemon dari Gen 1–9 + Pokemon GO.
 - **Beranda** (`/`) — hero slider, Pokemon pilihan acak, berita terbaru.

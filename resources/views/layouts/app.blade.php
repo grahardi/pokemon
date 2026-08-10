@@ -83,6 +83,26 @@
             .evo-circle { width: 72px; height: 72px; }
         }
 
+        /* Type defense chips */
+        .defense-chip {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 2px;
+            padding: .4rem .25rem;
+            border-radius: .5rem;
+            min-width: 64px;
+        }
+        .defense-chip-mult { font-size: .7rem; font-weight: 700; }
+        .defense-weak { background: #FEE2E2; }
+        .defense-weak .defense-chip-mult { color: #B91C1C; }
+        .defense-resist { background: #DCFCE7; }
+        .defense-resist .defense-chip-mult { color: #15803D; }
+        .defense-immune { background: #E0E7FF; }
+        .defense-immune .defense-chip-mult { color: #3730A3; }
+        .defense-neutral { background: #F3F4F6; }
+        .defense-neutral .defense-chip-mult { color: #6B7280; }
+
         /* Hero slider */
         #heroSlider { margin-top: -1px; }
         .hero-slide {

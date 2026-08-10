@@ -44,6 +44,9 @@ class PokemonSeeder extends Seeder
                 'weight_kg' => $item['weight_kg'] ?? null,
                 'evolution_chain_id' => $item['evolution_chain_id'] ?? null,
                 'evolves_from' => $item['evolves_from'] ?? null,
+                'abilities' => json_encode($item['abilities'] ?? []),
+                'moves_level' => json_encode($item['moves_level'] ?? []),
+                'moves_machine' => json_encode($item['moves_machine'] ?? []),
                 'hp' => $item['hp'],
                 'attack' => $item['attack'],
                 'defense' => $item['defense'],
@@ -60,12 +63,12 @@ class PokemonSeeder extends Seeder
             ];
         }
 
-        // Insert per chunk supaya aman untuk driver PostgreSQL
-        foreach (array_chunk($rows, 200) as $chunk) {
+        // Insert per chunk supaya aman untuk driver PostgreSQL (chunk kecil karena payload JSON moveset cukup besar)
+        foreach (array_chunk($rows, 50) as $chunk) {
             Pokemon::query()->upsert(
                 $chunk,
                 ['dex_number'],
-                ['slug', 'name', 'name_japanese', 'types', 'generation', 'genus', 'height_m', 'weight_kg', 'evolution_chain_id', 'evolves_from', 'hp', 'attack', 'defense', 'sp_attack', 'sp_defense', 'speed', 'image_url', 'updated_at']
+                ['slug', 'name', 'name_japanese', 'types', 'generation', 'genus', 'height_m', 'weight_kg', 'evolution_chain_id', 'evolves_from', 'abilities', 'moves_level', 'moves_machine', 'hp', 'attack', 'defense', 'sp_attack', 'sp_defense', 'speed', 'image_url', 'updated_at']
             );
         }
 
