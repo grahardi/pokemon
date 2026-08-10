@@ -35,6 +35,9 @@ class PokemonController extends Controller
         $data = $request->validate([
             'name' => ['required', 'string', 'max:100'],
             'name_japanese' => ['nullable', 'string', 'max:100'],
+            'genus' => ['nullable', 'string', 'max:100'],
+            'height_m' => ['nullable', 'numeric', 'min:0', 'max:99.9'],
+            'weight_kg' => ['nullable', 'numeric', 'min:0', 'max:9999.9'],
             'description' => ['nullable', 'string'],
             'image_url' => ['nullable', 'string', 'max:255'],
             'hp' => ['required', 'integer', 'min:0', 'max:999'],

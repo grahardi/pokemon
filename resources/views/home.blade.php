@@ -25,8 +25,8 @@
             </div>
         </div>
         <div class="carousel-item">
-            <div class="hero-slide hero-slide--katalog">
-                <div class="container h-100 d-flex align-items-center">
+            <div class="hero-slide" style="background-image: linear-gradient(180deg, rgba(0,0,0,.1), rgba(0,0,0,.6)), url('{{ asset('images/hero-slide-2.jpg') }}');">
+                <div class="container h-100 d-flex align-items-end align-items-md-center pb-5 pb-md-0">
                     <div class="hero-caption text-white">
                         <span class="badge bg-warning text-dark mb-2 fs-6"><i class="bi bi-collection"></i> {{ number_format($totalPokemon) }}+ Pokemon</span>
                         <h1 class="display-5 fw-bold hero-title">Katalog Pokemon Terlengkap</h1>
@@ -39,8 +39,8 @@
             </div>
         </div>
         <div class="carousel-item">
-            <div class="hero-slide hero-slide--berita">
-                <div class="container h-100 d-flex align-items-center">
+            <div class="hero-slide" style="background-image: linear-gradient(180deg, rgba(0,0,0,.1), rgba(0,0,0,.6)), url('{{ asset('images/hero-slide-3.jpg') }}');">
+                <div class="container h-100 d-flex align-items-end align-items-md-center pb-5 pb-md-0">
                     <div class="hero-caption text-white">
                         <span class="badge bg-danger mb-2 fs-6"><i class="bi bi-newspaper"></i> Update Terbaru</span>
                         <h1 class="display-5 fw-bold hero-title">Berita &amp; Info Seputar Dunia Pokemon</h1>

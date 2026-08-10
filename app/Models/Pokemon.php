@@ -11,7 +11,7 @@ class Pokemon extends Model
 
     protected $table = 'pokemons';
 
-    protected $appends = ['display_image'];
+    protected $appends = ['display_image', 'generation_label'];
 
     protected $fillable = [
         'dex_number',
@@ -19,6 +19,10 @@ class Pokemon extends Model
         'name',
         'name_japanese',
         'types',
+        'generation',
+        'genus',
+        'height_m',
+        'weight_kg',
         'hp',
         'attack',
         'defense',
@@ -42,6 +46,18 @@ class Pokemon extends Model
     public function getFormattedDexAttribute(): string
     {
         return '#' . str_pad((string) $this->dex_number, 3, '0', STR_PAD_LEFT);
+    }
+
+    public function getGenerationLabelAttribute(): string
+    {
+        $regions = [
+            1 => 'Kanto', 2 => 'Johto', 3 => 'Hoenn', 4 => 'Sinnoh',
+            5 => 'Unova', 6 => 'Kalos', 7 => 'Alola', 8 => 'Galar/Hisui',
+        ];
+
+        $region = $regions[$this->generation] ?? '';
+
+        return "Gen {$this->generation}" . ($region ? " ({$region})" : '');
     }
 
     /**

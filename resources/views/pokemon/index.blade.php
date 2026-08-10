@@ -7,10 +7,10 @@
     <div class="container">
         <h1 class="h3 mb-3">Katalog Pokemon</h1>
         <form method="GET" action="{{ route('pokemon.index') }}" class="row g-2">
-            <div class="col-md-5">
+            <div class="col-md-4">
                 <input type="text" name="q" value="{{ request('q') }}" class="form-control" placeholder="Cari nama atau nomor dex...">
             </div>
-            <div class="col-md-4">
+            <div class="col-md-3">
                 <select name="type" class="form-select">
                     <option value="">Semua Tipe</option>
                     @foreach ($types as $type)
@@ -18,7 +18,15 @@
                     @endforeach
                 </select>
             </div>
-            <div class="col-md-3 d-grid">
+            <div class="col-md-3">
+                <select name="generation" class="form-select">
+                    <option value="">Semua Generasi</option>
+                    @foreach ($generations as $gen => $label)
+                        <option value="{{ $gen }}" @selected((string) request('generation') === (string) $gen)>{{ $label }}</option>
+                    @endforeach
+                </select>
+            </div>
+            <div class="col-md-2 d-grid">
                 <button class="btn btn-danger fw-bold" type="submit"><i class="bi bi-search"></i> Cari</button>
             </div>
         </form>

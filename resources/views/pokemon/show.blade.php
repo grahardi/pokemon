@@ -32,8 +32,14 @@
                 <div class="dex-number text-white-50">{{ $pokemon->formatted_dex }}</div>
                 <h1 class="display-6 fw-bold">{{ $pokemon->name }}</h1>
                 @if ($pokemon->name_japanese)
-                    <p class="text-white-50">{{ $pokemon->name_japanese }}</p>
+                    <p class="text-white-50 mb-1">{{ $pokemon->name_japanese }}</p>
                 @endif
+                <div class="d-flex align-items-center gap-2 mb-3 flex-wrap">
+                    <span class="badge bg-white text-dark">{{ $pokemon->generation_label }}</span>
+                    @if ($pokemon->genus)
+                        <span class="text-white-50 small">{{ $pokemon->genus }}</span>
+                    @endif
+                </div>
                 <div class="d-flex gap-2 mb-3">
                     @foreach ($pokemon->types as $type)
                         <span class="type-badge fs-6" style="background-color: {{ $colors[$type] ?? '#777' }}">{{ $type }}</span>
@@ -82,7 +88,17 @@
                     <h6 class="card-title">Info Cepat</h6>
                     <ul class="list-unstyled small mb-0">
                         <li class="mb-2"><strong>Nomor Dex:</strong> {{ $pokemon->formatted_dex }}</li>
+                        <li class="mb-2"><strong>Generasi:</strong> {{ $pokemon->generation_label }}</li>
+                        @if ($pokemon->genus)
+                            <li class="mb-2"><strong>Kategori:</strong> {{ $pokemon->genus }}</li>
+                        @endif
                         <li class="mb-2"><strong>Tipe:</strong> {{ implode(' / ', $pokemon->types) }}</li>
+                        @if ($pokemon->height_m)
+                            <li class="mb-2"><strong>Tinggi:</strong> {{ number_format($pokemon->height_m, 1) }} m</li>
+                        @endif
+                        @if ($pokemon->weight_kg)
+                            <li class="mb-2"><strong>Berat:</strong> {{ number_format($pokemon->weight_kg, 1) }} kg</li>
+                        @endif
                         <li><strong>Total Stat Dasar:</strong> {{ $pokemon->total_stats }}</li>
                     </ul>
                 </div>

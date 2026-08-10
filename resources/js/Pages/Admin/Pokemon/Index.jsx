@@ -32,6 +32,7 @@ export default function Index({ pokemons, filters }) {
                             <th className="px-4 py-3">#</th>
                             <th className="px-4 py-3"></th>
                             <th className="px-4 py-3">Nama</th>
+                            <th className="px-4 py-3">Generasi</th>
                             <th className="px-4 py-3">Tipe</th>
                             <th className="px-4 py-3 text-right">Aksi</th>
                         </tr>
@@ -44,6 +45,7 @@ export default function Index({ pokemons, filters }) {
                                     <img src={p.display_image} alt={p.name} className="w-10 h-10 object-contain" loading="lazy" />
                                 </td>
                                 <td className="px-4 py-3 font-medium text-slate-800">{p.name}</td>
+                                <td className="px-4 py-3 text-slate-500">{p.generation_label}</td>
                                 <td className="px-4 py-3 text-slate-500">{p.types.join(' / ')}</td>
                                 <td className="px-4 py-3 text-right">
                                     <Link href={`/admin/pokemon/${p.slug}/edit`} className="text-blue-600 hover:underline">Edit</Link>

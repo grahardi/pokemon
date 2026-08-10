@@ -22,6 +22,10 @@ class PokemonController extends Controller
             $query->whereJsonContains('types', $type);
         }
 
+        if ($generation = $request->string('generation')->trim()->toString()) {
+            $query->where('generation', $generation);
+        }
+
         $pokemons = $query->orderBy('dex_number')->paginate(24)->withQueryString();
 
         $types = [
@@ -30,7 +34,13 @@ class PokemonController extends Controller
             'Dragon', 'Dark', 'Steel', 'Fairy',
         ];
 
-        return view('pokemon.index', compact('pokemons', 'types'));
+        $generations = [
+            1 => 'Gen 1 (Kanto)', 2 => 'Gen 2 (Johto)', 3 => 'Gen 3 (Hoenn)',
+            4 => 'Gen 4 (Sinnoh)', 5 => 'Gen 5 (Unova)', 6 => 'Gen 6 (Kalos)',
+            7 => 'Gen 7 (Alola)', 8 => 'Gen 8 (Galar/Hisui)',
+        ];
+
+        return view('pokemon.index', compact('pokemons', 'types', 'generations'));
     }
 
     public function show(Pokemon $pokemon)

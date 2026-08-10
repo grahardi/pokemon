@@ -5,6 +5,9 @@ export default function Form({ pokemon }) {
     const { data, setData, put, processing, errors } = useForm({
         name: pokemon.name,
         name_japanese: pokemon.name_japanese || '',
+        genus: pokemon.genus || '',
+        height_m: pokemon.height_m || '',
+        weight_kg: pokemon.weight_kg || '',
         description: pokemon.description || '',
         image_url: pokemon.image_url || '',
         hp: pokemon.hp,
@@ -34,7 +37,40 @@ export default function Form({ pokemon }) {
             <form onSubmit={submit} className="bg-white rounded-xl shadow p-6 max-w-2xl space-y-5">
                 <div className="flex items-center gap-4">
                     <img src={pokemon.display_image} alt={pokemon.name} className="w-20 h-20 object-contain bg-slate-50 rounded-lg" />
-                    <div className="text-sm text-slate-500">#{String(pokemon.dex_number).padStart(3, '0')} &middot; {pokemon.types.join(' / ')}</div>
+                    <div className="text-sm text-slate-500">#{String(pokemon.dex_number).padStart(3, '0')} &middot; {pokemon.generation_label} &middot; {pokemon.types.join(' / ')}</div>
+                </div>
+
+                <div className="grid grid-cols-3 gap-4">
+                    <div>
+                        <label className="block text-sm font-medium text-slate-700 mb-1">Kategori (Genus)</label>
+                        <input
+                            type="text"
+                            value={data.genus}
+                            onChange={(e) => setData('genus', e.target.value)}
+                            placeholder="mis. Seed Pokémon"
+                            className="w-full rounded-lg border-slate-300 focus:border-blue-500 focus:ring-blue-500"
+                        />
+                    </div>
+                    <div>
+                        <label className="block text-sm font-medium text-slate-700 mb-1">Tinggi (m)</label>
+                        <input
+                            type="number"
+                            step="0.1"
+                            value={data.height_m}
+                            onChange={(e) => setData('height_m', e.target.value)}
+                            className="w-full rounded-lg border-slate-300 focus:border-blue-500 focus:ring-blue-500"
+                        />
+                    </div>
+                    <div>
+                        <label className="block text-sm font-medium text-slate-700 mb-1">Berat (kg)</label>
+                        <input
+                            type="number"
+                            step="0.1"
+                            value={data.weight_kg}
+                            onChange={(e) => setData('weight_kg', e.target.value)}
+                            className="w-full rounded-lg border-slate-300 focus:border-blue-500 focus:ring-blue-500"
+                        />
+                    </div>
                 </div>
 
                 <div className="grid grid-cols-2 gap-4">

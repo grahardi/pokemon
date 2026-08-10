@@ -38,6 +38,10 @@ class PokemonSeeder extends Seeder
                 'name' => $item['name'],
                 'name_japanese' => $item['name_japanese'] ?? null,
                 'types' => json_encode($item['types']),
+                'generation' => $item['generation'] ?? 1,
+                'genus' => $item['genus'] ?? null,
+                'height_m' => $item['height_m'] ?? null,
+                'weight_kg' => $item['weight_kg'] ?? null,
                 'hp' => $item['hp'],
                 'attack' => $item['attack'],
                 'defense' => $item['defense'],
@@ -59,7 +63,7 @@ class PokemonSeeder extends Seeder
             Pokemon::query()->upsert(
                 $chunk,
                 ['dex_number'],
-                ['slug', 'name', 'name_japanese', 'types', 'hp', 'attack', 'defense', 'sp_attack', 'sp_defense', 'speed', 'image_url', 'updated_at']
+                ['slug', 'name', 'name_japanese', 'types', 'generation', 'genus', 'height_m', 'weight_kg', 'hp', 'attack', 'defense', 'sp_attack', 'sp_defense', 'speed', 'image_url', 'updated_at']
             );
         }
 

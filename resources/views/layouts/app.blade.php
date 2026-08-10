@@ -53,8 +53,6 @@
             background-position: center;
             position: relative;
         }
-        .hero-slide--katalog { background: linear-gradient(135deg, var(--brand-blue), #1e2a8f); }
-        .hero-slide--berita { background: linear-gradient(135deg, var(--brand-red), #7a0718); }
         .hero-caption { max-width: 640px; }
         .hero-title { text-shadow: 0 2px 10px rgba(0,0,0,.45); }
         #heroSlider .carousel-control-prev,

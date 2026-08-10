@@ -4,7 +4,10 @@
         <div class="card pokemon-card h-100 shadow-sm text-center">
             <img src="{{ $pokemon->display_image }}" class="card-img-top" style="height:150px;object-fit:contain" loading="lazy" alt="{{ $pokemon->name }}">
             <div class="card-body py-2">
-                <div class="dex-number">{{ $pokemon->formatted_dex }}</div>
+                <div class="d-flex justify-content-between align-items-center">
+                    <span class="dex-number">{{ $pokemon->formatted_dex }}</span>
+                    <span class="badge bg-light text-secondary border">Gen {{ $pokemon->generation }}</span>
+                </div>
                 <h6 class="card-title mb-2">{{ $pokemon->name }}</h6>
                 <div class="d-flex justify-content-center gap-1 flex-wrap">
                     @foreach ($pokemon->types as $type)
