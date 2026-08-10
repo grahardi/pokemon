@@ -3,19 +3,62 @@
 @section('title', 'Beranda')
 
 @section('content')
-<div class="hero-pokeball" style="background: linear-gradient(135deg, var(--brand-blue), var(--brand-red));">
-    <div class="container py-5 text-white">
-        <div class="row align-items-center">
-            <div class="col-lg-7">
-                <h1 class="display-5 fw-bold">Portal Berita, Info & Katalog Pokemon Indonesia</h1>
-                <p class="lead">Temukan berita terbaru, info seputar game, dan jelajahi katalog lengkap {{ number_format($totalPokemon) }}+ Pokemon dari berbagai generasi.</p>
-                <a href="{{ route('pokemon.index') }}" class="btn btn-warning btn-lg fw-bold text-dark">
-                    <i class="bi bi-search"></i> Jelajahi Katalog Pokemon
-                </a>
-                <a href="{{ route('news.index') }}" class="btn btn-outline-light btn-lg">Baca Berita</a>
+<div id="heroSlider" class="carousel slide carousel-fade shadow-lg" data-bs-ride="carousel" data-bs-interval="5000">
+    <div class="carousel-indicators">
+        <button type="button" data-bs-target="#heroSlider" data-bs-slide-to="0" class="active" aria-current="true"></button>
+        <button type="button" data-bs-target="#heroSlider" data-bs-slide-to="1"></button>
+        <button type="button" data-bs-target="#heroSlider" data-bs-slide-to="2"></button>
+    </div>
+    <div class="carousel-inner">
+        <div class="carousel-item active">
+            <div class="hero-slide" style="background-image: linear-gradient(180deg, rgba(0,0,0,.15), rgba(0,0,0,.55)), url('{{ asset('images/hero-banner.jpg') }}');">
+                <div class="container h-100 d-flex align-items-end align-items-md-center pb-5 pb-md-0">
+                    <div class="hero-caption text-white">
+                        <h1 class="display-5 fw-bold hero-title">Tangkap Pokemonmu Sekarang Juga!</h1>
+                        <p class="lead d-none d-md-block">Portal berita, info, dan katalog {{ number_format($totalPokemon) }}+ Pokemon terlengkap berbahasa Indonesia.</p>
+                        <a href="{{ route('pokemon.index') }}" class="btn btn-warning btn-lg fw-bold text-dark">
+                            <i class="bi bi-search"></i> Jelajahi Katalog
+                        </a>
+                        <a href="{{ route('news.index') }}" class="btn btn-outline-light btn-lg">Baca Berita</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="carousel-item">
+            <div class="hero-slide hero-slide--katalog">
+                <div class="container h-100 d-flex align-items-center">
+                    <div class="hero-caption text-white">
+                        <span class="badge bg-warning text-dark mb-2 fs-6"><i class="bi bi-collection"></i> {{ number_format($totalPokemon) }}+ Pokemon</span>
+                        <h1 class="display-5 fw-bold hero-title">Katalog Pokemon Terlengkap</h1>
+                        <p class="lead d-none d-md-block">Cari berdasarkan nama, nomor dex, atau tipe — lengkap dengan statistik tempur tiap Pokemon.</p>
+                        <a href="{{ route('pokemon.index') }}" class="btn btn-warning btn-lg fw-bold text-dark">
+                            <i class="bi bi-search"></i> Mulai Cari Pokemon
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="carousel-item">
+            <div class="hero-slide hero-slide--berita">
+                <div class="container h-100 d-flex align-items-center">
+                    <div class="hero-caption text-white">
+                        <span class="badge bg-danger mb-2 fs-6"><i class="bi bi-newspaper"></i> Update Terbaru</span>
+                        <h1 class="display-5 fw-bold hero-title">Berita &amp; Info Seputar Dunia Pokemon</h1>
+                        <p class="lead d-none d-md-block">Ikuti kabar terbaru game, event, dan info menarik lainnya.</p>
+                        <a href="{{ route('news.index') }}" class="btn btn-light btn-lg fw-bold text-dark">
+                            <i class="bi bi-newspaper"></i> Baca Berita
+                        </a>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
+    <button class="carousel-control-prev" type="button" data-bs-target="#heroSlider" data-bs-slide="prev">
+        <span class="carousel-control-prev-icon"></span>
+    </button>
+    <button class="carousel-control-next" type="button" data-bs-target="#heroSlider" data-bs-slide="next">
+        <span class="carousel-control-next-icon"></span>
+    </button>
 </div>
 
 <div class="container py-5">

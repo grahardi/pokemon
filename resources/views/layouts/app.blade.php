@@ -39,6 +39,30 @@
         footer a { color: #fff; text-decoration: none; }
         .stat-bar { height: .5rem; border-radius: .5rem; background: #e5e7eb; overflow: hidden; }
         .stat-bar > div { height: 100%; }
+
+        /* Hero slider */
+        #heroSlider { margin-top: -1px; }
+        .hero-slide {
+            height: 62vh;
+            min-height: 380px;
+            max-height: 620px;
+            background-size: cover;
+            background-position: center;
+            position: relative;
+        }
+        .hero-slide--katalog { background: linear-gradient(135deg, var(--brand-blue), #1e2a8f); }
+        .hero-slide--berita { background: linear-gradient(135deg, var(--brand-red), #7a0718); }
+        .hero-caption { max-width: 640px; }
+        .hero-title { text-shadow: 0 2px 10px rgba(0,0,0,.45); }
+        #heroSlider .carousel-control-prev,
+        #heroSlider .carousel-control-next { width: 5%; opacity: .7; }
+        #heroSlider .carousel-indicators button {
+            width: 10px; height: 10px; border-radius: 50%; margin: 0 4px;
+        }
+        @media (max-width: 767.98px) {
+            .hero-slide { height: 68vh; min-height: 440px; }
+            .hero-title { font-size: 1.75rem; }
+        }
     </style>
     @stack('styles')
 </head>
