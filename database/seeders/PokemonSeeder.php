@@ -21,11 +21,20 @@ class PokemonSeeder extends Seeder
 
         $rows = [];
         $now = now();
+        $usedSlugs = [];
 
         foreach ($data as $item) {
+            $baseSlug = Str::slug($item['name']);
+            $slug = $baseSlug;
+
+            if (isset($usedSlugs[$slug])) {
+                $slug = $baseSlug . '-' . $item['dex_number'];
+            }
+            $usedSlugs[$slug] = true;
+
             $rows[] = [
                 'dex_number' => $item['dex_number'],
-                'slug' => Str::slug($item['name']),
+                'slug' => $slug,
                 'name' => $item['name'],
                 'name_japanese' => $item['name_japanese'] ?? null,
                 'types' => json_encode($item['types']),
