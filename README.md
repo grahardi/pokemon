@@ -1,6 +1,6 @@
 # Pokemon.id
 
-Situs portal Pokemon Indonesia — Berita, Info, Game, dan Katalog Pokemon lengkap (809 Pokemon, generasi 1–7).
+Situs portal Pokemon Indonesia — Berita, Info, Game, dan Katalog Pokemon lengkap (905 Pokemon, Generasi 1–8).
 
 Dibangun dengan **Laravel 13**, **PostgreSQL**, dan **Bootstrap 5** (CDN, tanpa build step npm).
 
@@ -70,7 +70,7 @@ Butuh Node.js 18+ terinstal di server. Kalau aaPanel belum ada Node, bisa build 
 
 ## Update data Pokemon
 
-Data seed katalog ada di `database/seeders/data/pokedex.json` (809 entri: nama, tipe, base stats, gambar dari sprite resmi PokeAPI). Untuk re-seed:
+Data seed katalog ada di `database/seeders/data/pokedex.json` (905 entri: nama, tipe, base stats, gambar dari sprite resmi PokeAPI). Untuk re-seed:
 
 ```bash
 php artisan db:seed --class=PokemonSeeder --force
@@ -78,7 +78,7 @@ php artisan db:seed --class=PokemonSeeder --force
 
 ## Cache gambar Pokemon secara lokal (opsional, direkomendasikan)
 
-Secara default, gambar Pokemon di-load langsung dari `raw.githubusercontent.com` (CDN GitHub). Supaya situs lebih cepat dan tidak bergantung ke server luar, jalankan command berikut di server untuk men-download semua 809 gambar ke lokal (otomatis dikompres ke WebP, max lebar 400px):
+Secara default, gambar Pokemon di-load langsung dari `raw.githubusercontent.com` (CDN GitHub). Supaya situs lebih cepat dan tidak bergantung ke server luar, jalankan command berikut di server untuk men-download semua 905 gambar ke lokal (otomatis dikompres ke WebP, max lebar 400px):
 
 ```bash
 php artisan pokemon:cache-images
@@ -89,7 +89,7 @@ php artisan pokemon:cache-images
 - Command otomatis skip gambar yang sudah ada. Tambahkan `--force` untuk download ulang semua.
 - Untuk retry sebagian: `php artisan pokemon:cache-images --only=1,4,7,150`
 - Butuh ekstensi PHP **GD** untuk kompresi WebP (biasanya sudah aktif di aaPanel). Kalau tidak ada, otomatis fallback simpan sebagai PNG asli.
-- Proses ini butuh waktu beberapa menit (809 request ke GitHub) — jalankan sekali saja, lalu cukup ulangi kalau ada Pokemon baru ditambahkan.
+- Proses ini butuh waktu beberapa menit (905 request ke GitHub) — jalankan sekali saja, lalu cukup ulangi kalau ada Pokemon baru ditambahkan.
 
 ## Struktur utama
 

@@ -19,6 +19,7 @@ class GameSeeder extends Seeder
             ['title' => 'Pokémon X & Y', 'platform' => 'Nintendo 3DS', 'generation' => 'Gen 6', 'release_date' => '2013-10-12', 'description' => 'Wilayah Kalos, game 3D pertama dalam seri utama dan pengenalan Mega Evolution.'],
             ['title' => 'Pokémon Sun & Moon', 'platform' => 'Nintendo 3DS', 'generation' => 'Gen 7', 'release_date' => '2016-11-18', 'description' => 'Wilayah Alola dengan sistem Trial menggantikan Gym, serta Z-Move.'],
             ['title' => 'Pokémon Sword & Shield', 'platform' => 'Nintendo Switch', 'generation' => 'Gen 8', 'release_date' => '2019-11-15', 'description' => 'Wilayah Galar dengan fitur Dynamax/Gigantamax dan Wild Area open-world.'],
+            ['title' => 'Pokémon Legends: Arceus', 'platform' => 'Nintendo Switch', 'generation' => 'Gen 8', 'release_date' => '2022-01-28', 'description' => 'Wilayah Hisui (Sinnoh kuno) dengan gameplay action-adventure open-world dan mekanik menangkap baru, memperkenalkan varian Hisuian dan evolusi baru seperti Wyrdeer, Kleavor, dan Enamorus.'],
             ['title' => 'Pokémon Scarlet & Violet', 'platform' => 'Nintendo Switch', 'generation' => 'Gen 9', 'release_date' => '2022-11-18', 'description' => 'Wilayah Paldea, game open-world penuh pertama dalam seri utama.'],
             ['title' => 'Pokémon GO', 'platform' => 'Mobile (iOS/Android)', 'generation' => 'Spin-off', 'release_date' => '2016-07-06', 'description' => 'Game augmented reality berbasis lokasi untuk menangkap Pokemon di dunia nyata.'],
         ];
