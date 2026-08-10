@@ -37,6 +37,8 @@
         }
         footer { background: #1f2937; color: #cbd5e1; }
         footer a { color: #fff; text-decoration: none; }
+        .sponsor-badge { transition: opacity .15s ease; }
+        .sponsor-badge:hover { opacity: .8; }
         .stat-bar { height: .5rem; border-radius: .5rem; background: #e5e7eb; overflow: hidden; }
         .stat-bar > div { height: 100%; }
 
@@ -111,7 +113,16 @@
                 </div>
             </div>
             <hr class="border-secondary">
-            <p class="small text-center mb-0">&copy; {{ date('Y') }} Pokemon.id. Dibuat dengan Laravel.</p>
+            <div class="d-flex flex-column flex-md-row justify-content-between align-items-center gap-2 py-2">
+                <p class="small text-center text-md-start mb-0">&copy; {{ date('Y') }} Pokemon.id. Dibuat dengan Laravel.</p>
+                <a href="https://www.intan.net.id/" target="_blank" rel="noopener" class="d-flex align-items-center gap-2 text-decoration-none small sponsor-badge" title="PT Bella Intan Media adalah perusahaan penyedia layanan Internet (ISP), Hosting, IP Transit, dan Web Design.">
+                    <span class="text-secondary">Hosting &amp; server disponsori oleh</span>
+                    <span class="d-inline-flex align-items-center gap-1 fw-bold text-white">
+                        <i class="bi bi-hdd-network-fill text-warning"></i>
+                        PT Bella Intan Media
+                    </span>
+                </a>
+            </div>
         </div>
     </footer>
 
