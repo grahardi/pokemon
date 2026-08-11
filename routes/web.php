@@ -4,6 +4,7 @@ use App\Http\Controllers\Admin\DashboardController as AdminDashboardController;
 use App\Http\Controllers\Admin\GameController as AdminGameController;
 use App\Http\Controllers\Admin\NewsController as AdminNewsController;
 use App\Http\Controllers\Admin\PokemonController as AdminPokemonController;
+use App\Http\Controllers\Admin\TrainerController as AdminTrainerController;
 use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\BattleGameController;
 use App\Http\Controllers\GameController;
@@ -33,6 +34,7 @@ Route::prefix('game')->name('games.')->group(function () {
 Route::get('/tarung', [BattleGameController::class, 'index'])->name('battle.index');
 Route::get('/api/tarung/random', [BattleGameController::class, 'randomPokemon'])->name('battle.random');
 Route::get('/api/tarung/find', [BattleGameController::class, 'findByName'])->name('battle.find');
+Route::get('/api/tarung/trainers', [BattleGameController::class, 'trainers'])->name('battle.trainers');
 
 // --- Autentikasi Admin ---
 Route::middleware('guest')->group(function () {
@@ -47,6 +49,7 @@ Route::middleware('auth')->prefix('admin')->name('admin.')->group(function () {
 
     Route::resource('news', AdminNewsController::class)->except('show');
     Route::resource('games', AdminGameController::class)->except('show');
+    Route::resource('trainers', AdminTrainerController::class)->except('show');
 
     Route::get('pokemon', [AdminPokemonController::class, 'index'])->name('pokemon.index');
     Route::get('pokemon/{pokemon}/edit', [AdminPokemonController::class, 'edit'])->name('pokemon.edit');

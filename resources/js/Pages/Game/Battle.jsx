@@ -1,4 +1,4 @@
-import { useState, useRef } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { Head } from '@inertiajs/react';
 import HpBar from '../../Components/Game/HpBar';
 import PokemonPickCard from '../../Components/Game/PokemonPickCard';
@@ -14,6 +14,7 @@ const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 
 export default function Battle({ totalPokemon }) {
     const [phase, setPhase] = useState('trainer'); // trainer | nickname | mode | select | team-select | battle | result
+    const [trainers, setTrainers] = useState([]);
     const [trainer, setTrainer] = useState(null);
     const [nickname, setNickname] = useState('');
     const [mode, setMode] = useState(null); // battle | challenge
@@ -46,6 +47,13 @@ export default function Battle({ totalPokemon }) {
         setLog((prev) => [...prev, msg]);
         setTimeout(() => logEndRef.current?.scrollIntoView({ behavior: 'smooth' }), 50);
     };
+
+    useEffect(() => {
+        fetch('/api/tarung/trainers')
+            .then((res) => res.json())
+            .then(setTrainers)
+            .catch(() => setTrainers([]));
+    }, []);
 
     const confirmTrainer = () => {
         if (!trainer) {
@@ -325,7 +333,7 @@ export default function Battle({ totalPokemon }) {
                     <div className="max-w-lg mx-auto mt-8">
                         <h1 className="text-3xl font-extrabold text-center mb-1">⚔️ Arena Tarung</h1>
                         <p className="text-slate-500 text-center text-sm mb-6">Pilih avatar trainer-mu:</p>
-                        <TrainerSelect selected={trainer} onSelect={setTrainer} />
+                        <TrainerSelect trainers={trainers} selected={trainer} onSelect={setTrainer} />
                         {error && <p className="text-red-500 text-sm text-center mt-3">{error}</p>}
                         <button
                             onClick={confirmTrainer}
@@ -338,8 +346,15 @@ export default function Battle({ totalPokemon }) {
 
                 {phase === 'nickname' && (
                     <div className="bg-white rounded-2xl shadow-lg p-8 text-center max-w-md mx-auto mt-16">
-                        <div className={`w-16 h-16 rounded-full bg-gradient-to-br ${trainer?.gradient} flex items-center justify-center mx-auto mb-3`}>
-                            <i className={`bi ${trainer?.icon} text-3xl text-white`}></i>
+                        <div
+                            className="w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-3 overflow-hidden"
+                            style={{ background: `linear-gradient(135deg, ${trainer?.gradient_from || '#EF4444'}, ${trainer?.gradient_to || '#3B82F6'})` }}
+                        >
+                            {trainer?.image_url ? (
+                                <img src={trainer.image_url} alt={trainer.name} className="w-full h-full object-cover" />
+                            ) : (
+                                <i className={`bi ${trainer?.icon || 'bi-person-fill'} text-3xl text-white`}></i>
+                            )}
                         </div>
                         <h1 className="text-2xl font-extrabold mb-1">Siapa namamu, Trainer?</h1>
                         <p className="text-slate-500 text-sm mb-6">Nickname ini akan tampil selama pertarungan.</p>

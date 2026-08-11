@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Pokemon;
+use App\Models\Trainer;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 
@@ -13,6 +14,16 @@ class BattleGameController extends Controller
         return Inertia::render('Game/Battle', [
             'totalPokemon' => Pokemon::count(),
         ]);
+    }
+
+    /**
+     * Daftar trainer aktif untuk dipilih pemain (dikelola admin).
+     */
+    public function trainers()
+    {
+        return response()->json(
+            Trainer::query()->active()->orderBy('order')->get()
+        );
     }
 
     /**

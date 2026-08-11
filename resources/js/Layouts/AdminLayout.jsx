@@ -5,6 +5,7 @@ const navItems = [
     { href: '/admin/news', label: 'Berita', icon: '📰' },
     { href: '/admin/games', label: 'Game', icon: '🎮' },
     { href: '/admin/pokemon', label: 'Katalog Pokemon', icon: '📕' },
+    { href: '/admin/trainers', label: 'Trainer (Arena Tarung)', icon: '⚔️' },
 ];
 
 export default function AdminLayout({ children, title }) {

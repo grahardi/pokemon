@@ -13,6 +13,7 @@ class DatabaseSeeder extends Seeder
             PokemonSeeder::class,
             GameSeeder::class,
             NewsSeeder::class,
+            TrainerSeeder::class,
         ]);
     }
 }

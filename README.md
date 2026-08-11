@@ -14,10 +14,11 @@ Dibangun dengan **Laravel 13**, **PostgreSQL**, dan **Bootstrap 5** (CDN, tanpa 
 - **Moveset**: diambil dari data mekanik game (nama skill, tipe, power, akurasi, PP — ini adalah data faktual, bukan teks kreatif) menggunakan versi game terakhir yang tersedia untuk tiap Pokemon di dataset sumber (PokeAPI/pokedex, hanya mencakup hingga Gen 8). Tidak mencakup egg moves atau tutor moves untuk menjaga scope tetap wajar.
 - **Sengaja tidak ada**: teks Pokedex resmi per game (flavor text) — itu teks kreatif berhak cipta Nintendo/Game Freak yang tidak direproduksi di situs ini.
 - **Deskripsi karakter**: kalimat pembuka (tipe & generasi) digenerate otomatis dari data. Deskripsi fisik/desain tiap Pokemon ditulis orisinal (bukan terjemahan dari pokemondb atau sumber lain), mencakup seluruh 905 Pokemon.
+- **Trainer Arena Tarung**: nama, gambar, dan warna avatar trainer sepenuhnya dikelola lewat panel admin (`/admin/trainers`) — bukan hardcode di kode. Kamu bertanggung jawab atas nama/gambar apa pun yang dimasukkan di sana.
 - **Berita** (`/berita`) — artikel berita & info seputar Pokemon.
 - **Game** (`/game`) — daftar game utama Pokemon dari Gen 1–9 + Pokemon GO.
 - **Beranda** (`/`) — hero slider, Pokemon pilihan acak, berita terbaru.
-- **Arena Tarung** (`/tarung`) — mini-game battle vs bot: pilih avatar trainer (Ash/Blue/Red/Team Rocket, badge bergaya bukan artwork asli) → isi nickname → pilih **Mode Battle** (1 Pokemon lawan 1 bot acak) atau **Mode Challenge** (susun tim 3 Pokemon, tembus gauntlet 6 level sampai boss Mewtwo/Arceus). Damage dihitung otomatis pakai formula & type chart yang sama dengan katalog, lengkap animasi serang/kena hit. Dibangun dengan React + Inertia (public, tanpa perlu login).
+- **Arena Tarung** (`/tarung`) — mini-game battle vs bot: pilih avatar trainer (dikelola sepenuhnya lewat admin panel — nama, gambar/ikon, warna bebas ditentukan sendiri) → isi nickname → pilih **Mode Battle** (1 Pokemon lawan 1 bot acak) atau **Mode Challenge** (susun tim 3 Pokemon, tembus gauntlet 6 level sampai boss Mewtwo/Arceus). Damage dihitung otomatis pakai formula & type chart yang sama dengan katalog, lengkap animasi serang/kena hit. Dibangun dengan React + Inertia (public, tanpa perlu login).
 - **Panel Admin** (`/admin`) — dashboard, CRUD Berita & Game, edit data Pokemon. Dibangun dengan **React + Inertia.js** (halaman publik tetap Blade untuk SEO, hanya area admin yang pakai React).
 
 ## Arsitektur
