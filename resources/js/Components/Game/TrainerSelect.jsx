@@ -1,8 +1,81 @@
-import { useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 
 export default function TrainerSelect({ trainers, onPick }) {
     const [drawnId, setDrawnId] = useState(null);
     const scrollRef = useRef(null);
+    const itemRefs = useRef([]);
+    const isJumping = useRef(false);
+    const scrollTimeout = useRef(null);
+
+    const hasMultiple = trainers && trainers.length > 1;
+    // Klon trainer terakhir di depan & trainer pertama di belakang, biar bisa "loop"
+    // tanpa terasa patah begitu geser melewati ujung.
+    const list = hasMultiple
+        ? [trainers[trainers.length - 1], ...trainers, trainers[0]]
+        : (trainers || []);
+
+    const jumpTo = (index, smooth = false) => {
+        const container = scrollRef.current;
+        const target = itemRefs.current[index];
+        if (!container || !target) return;
+        const containerRect = container.getBoundingClientRect();
+        const targetRect = target.getBoundingClientRect();
+        const offset = (targetRect.left + targetRect.width / 2) - (containerRect.left + containerRect.width / 2);
+        if (smooth) {
+            container.scrollBy({ left: offset, behavior: 'smooth' });
+        } else {
+            container.scrollLeft += offset;
+        }
+    };
+
+    useEffect(() => {
+        if (!hasMultiple) return;
+        // Posisikan awal ke trainer pertama asli (index 1), tanpa animasi,
+        // supaya klon trainer terakhir sudah "mengintip" di sisi kiri sejak awal.
+        const raf = requestAnimationFrame(() => jumpTo(1, false));
+        return () => cancelAnimationFrame(raf);
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [trainers]);
+
+    const getCenterIndex = () => {
+        const container = scrollRef.current;
+        if (!container) return null;
+        const containerRect = container.getBoundingClientRect();
+        const containerCenter = containerRect.left + containerRect.width / 2;
+        let closestIdx = 0;
+        let closestDist = Infinity;
+        itemRefs.current.forEach((el, idx) => {
+            if (!el) return;
+            const rect = el.getBoundingClientRect();
+            const dist = Math.abs(rect.left + rect.width / 2 - containerCenter);
+            if (dist < closestDist) {
+                closestDist = dist;
+                closestIdx = idx;
+            }
+        });
+        return closestIdx;
+    };
+
+    const handleScrollSettled = () => {
+        if (!hasMultiple || isJumping.current) return;
+        const idx = getCenterIndex();
+        if (idx === null) return;
+
+        if (idx === 0) {
+            isJumping.current = true;
+            jumpTo(list.length - 2, false); // klon terakhir -> trainer asli terakhir
+            setTimeout(() => { isJumping.current = false; }, 50);
+        } else if (idx === list.length - 1) {
+            isJumping.current = true;
+            jumpTo(1, false); // klon pertama -> trainer asli pertama
+            setTimeout(() => { isJumping.current = false; }, 50);
+        }
+    };
+
+    const onScroll = () => {
+        if (scrollTimeout.current) clearTimeout(scrollTimeout.current);
+        scrollTimeout.current = setTimeout(handleScrollSettled, 120);
+    };
 
     if (!trainers || trainers.length === 0) {
         return (
@@ -25,7 +98,7 @@ export default function TrainerSelect({ trainers, onPick }) {
 
     return (
         <div className="relative -mx-4 px-4">
-            {trainers.length > 1 && (
+            {hasMultiple && (
                 <>
                     <button
                         type="button"
@@ -48,12 +121,17 @@ export default function TrainerSelect({ trainers, onPick }) {
 
             <div
                 ref={scrollRef}
+                onScroll={onScroll}
                 className="flex gap-4 overflow-x-auto pt-2 pb-3 snap-x snap-mandatory scrollbar-hide px-11 sm:px-12"
             >
-                {trainers.map((t) => {
+                {list.map((t, i) => {
                     const isDrawn = drawnId === t.id;
                     return (
-                        <div key={t.id} className="snap-center shrink-0 w-60">
+                        <div
+                            key={`${t.id}-${i}`}
+                            ref={(el) => (itemRefs.current[i] = el)}
+                            className="snap-center shrink-0 w-60"
+                        >
                             <div
                                 onClick={() => handleCardClick(t)}
                                 className={`relative w-full rounded-2xl p-5 text-center shadow-lg cursor-pointer transition-all duration-200 ${
@@ -87,7 +165,7 @@ export default function TrainerSelect({ trainers, onPick }) {
                 })}
             </div>
 
-            {trainers.length > 1 && (
+            {hasMultiple && (
                 <p className="text-center text-xs text-slate-400 mt-1">
                     <span className="sm:hidden">👈 Geser atau ketuk panah 👉</span>
                     <span className="hidden sm:inline">Klik kartu untuk pilih, atau geser/pakai panah</span>
