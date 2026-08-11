@@ -17,16 +17,49 @@ class BattleGameController extends Controller
 
     /**
      * Ambil N Pokemon acak dengan data siap-tarung (stats, tipe, gambar, 4 skill terkuat).
+     * Support filter min_bst/max_bst (total base stat) untuk level difficulty di mode Challenge.
      */
     public function randomPokemon(Request $request)
     {
         $count = min(10, max(1, (int) $request->get('count', 3)));
         $excludeIds = array_filter(explode(',', $request->get('exclude', '')));
+        $minBst = $request->get('min_bst');
+        $maxBst = $request->get('max_bst');
+
+        $query = Pokemon::query()
+            ->when($excludeIds, fn ($q) => $q->whereNotIn('id', $excludeIds));
+
+        if ($minBst || $maxBst) {
+            $query->whereRaw(
+                '(hp + attack + defense + sp_attack + sp_defense + speed) BETWEEN ? AND ?',
+                [$minBst ?: 0, $maxBst ?: 9999]
+            );
+        }
+
+        $pokemons = $query->inRandomOrder()->take($count)->get();
+
+        return response()->json(
+            $pokemons->map(fn (Pokemon $p) => $this->formatForBattle($p))->values()
+        );
+    }
+
+    /**
+     * Cari Pokemon spesifik by nama (dipakai untuk boss fight, mis. Mewtwo/Arceus).
+     */
+    public function findByName(Request $request)
+    {
+        $names = array_filter(explode(',', $request->get('names', '')));
+
+        if (empty($names)) {
+            return response()->json([]);
+        }
 
         $pokemons = Pokemon::query()
-            ->when($excludeIds, fn ($q) => $q->whereNotIn('id', $excludeIds))
-            ->inRandomOrder()
-            ->take($count)
+            ->where(function ($q) use ($names) {
+                foreach ($names as $name) {
+                    $q->orWhere('name', 'ilike', trim($name));
+                }
+            })
             ->get();
 
         return response()->json(

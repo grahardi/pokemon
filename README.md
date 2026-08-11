@@ -17,7 +17,7 @@ Dibangun dengan **Laravel 13**, **PostgreSQL**, dan **Bootstrap 5** (CDN, tanpa 
 - **Berita** (`/berita`) — artikel berita & info seputar Pokemon.
 - **Game** (`/game`) — daftar game utama Pokemon dari Gen 1–9 + Pokemon GO.
 - **Beranda** (`/`) — hero slider, Pokemon pilihan acak, berita terbaru.
-- **Arena Tarung** (`/tarung`) — mini-game battle vs bot: isi nickname → pilih 1 dari 3 Pokemon acak → lawan bot dengan AI sederhana. Damage dihitung otomatis pakai formula & type chart yang sama dengan katalog, lengkap animasi serang/kena hit. Dibangun dengan React + Inertia (public, tanpa perlu login).
+- **Arena Tarung** (`/tarung`) — mini-game battle vs bot: pilih avatar trainer (Ash/Blue/Red/Team Rocket, badge bergaya bukan artwork asli) → isi nickname → pilih **Mode Battle** (1 Pokemon lawan 1 bot acak) atau **Mode Challenge** (susun tim 3 Pokemon, tembus gauntlet 6 level sampai boss Mewtwo/Arceus). Damage dihitung otomatis pakai formula & type chart yang sama dengan katalog, lengkap animasi serang/kena hit. Dibangun dengan React + Inertia (public, tanpa perlu login).
 - **Panel Admin** (`/admin`) — dashboard, CRUD Berita & Game, edit data Pokemon. Dibangun dengan **React + Inertia.js** (halaman publik tetap Blade untuk SEO, hanya area admin yang pakai React).
 
 ## Arsitektur

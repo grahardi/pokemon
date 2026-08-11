@@ -32,6 +32,7 @@ Route::prefix('game')->name('games.')->group(function () {
 // --- Game Battle vs Bot ---
 Route::get('/tarung', [BattleGameController::class, 'index'])->name('battle.index');
 Route::get('/api/tarung/random', [BattleGameController::class, 'randomPokemon'])->name('battle.random');
+Route::get('/api/tarung/find', [BattleGameController::class, 'findByName'])->name('battle.find');
 
 // --- Autentikasi Admin ---
 Route::middleware('guest')->group(function () {
