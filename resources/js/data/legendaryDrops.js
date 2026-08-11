@@ -9,5 +9,11 @@ export const LEGENDARY_DROP_POOL = [
     'Zacian', 'Zamazenta', 'Eternatus', 'Kyogre', 'Groudon', 'Regigigas',
 ];
 
-export const DROP_CHANCE = 0.3;
 export const DROP_EVERY_N_WINS = 3;
+
+// Peluang tiap tier gacha (total harus 100%)
+export const GACHA_TIERS = {
+    legendary: { chance: 0.10, label: 'Legendaris', color: '#F59E0B', emoji: '🌟' },
+    secondEvo: { chance: 0.25, label: 'Evolusi Tahap 2', color: '#8B5CF6', emoji: '⭐' },
+    common: { chance: 0.65, label: 'Pokemon Baru', color: '#64748B', emoji: '🎁' },
+};

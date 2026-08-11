@@ -37,6 +37,8 @@ class BattleGameController extends Controller
         $minBst = $request->get('min_bst');
         $maxBst = $request->get('max_bst');
         $evolvableOnly = $request->boolean('evolvable_only');
+        $hasEvolved = $request->boolean('has_evolved');
+        $noEvolution = $request->boolean('no_evolution');
 
         $query = Pokemon::query()
             ->when($excludeIds, fn ($q) => $q->whereNotIn('id', $excludeIds));
@@ -59,6 +61,22 @@ class BattleGameController extends Controller
 
             $query->whereIn('dex_number', $evolvableDex)
                 ->whereNull('evolves_from');
+        }
+
+        if ($hasEvolved) {
+            // Pokemon yang sudah evolusi minimal 1x (tier "evolusi tahap 2" di gacha).
+            $query->whereNotNull('evolves_from');
+        }
+
+        if ($noEvolution) {
+            // Pokemon yang sama sekali tidak punya rantai evolusi (tier "non-evolusi" di gacha).
+            $evolvableDex = Pokemon::query()
+                ->whereNotNull('evolves_from')
+                ->pluck('evolves_from')
+                ->unique();
+
+            $query->whereNull('evolves_from')
+                ->whereNotIn('dex_number', $evolvableDex);
         }
 
         $pokemons = $query->inRandomOrder()->take($count)->get();

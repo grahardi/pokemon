@@ -15,7 +15,7 @@ import Confetti from '../../Components/Game/Confetti';
 import PetalFall from '../../Components/Game/PetalFall';
 import { TYPE_COLORS } from '../../data/typeChart';
 import { CHALLENGE_LEVELS } from '../../data/challengeLevels';
-import { LEGENDARY_DROP_POOL, DROP_CHANCE, DROP_EVERY_N_WINS } from '../../data/legendaryDrops';
+import { LEGENDARY_DROP_POOL, DROP_EVERY_N_WINS, GACHA_TIERS } from '../../data/legendaryDrops';
 import { battleMaxHp, calculateDamage, pickBotMove, effectivenessLabel } from '../../lib/battleEngine';
 import { unlockAudio, playAttackSound, playHitSound, playWinSound, playLoseSound } from '../../lib/sfx';
 
@@ -58,6 +58,7 @@ export default function Battle({ totalPokemon }) {
     const [evolveSelection, setEvolveSelection] = useState(null); // {slotIndex, target}
 
     const [droppedPokemon, setDroppedPokemon] = useState(null);
+    const [dropTier, setDropTier] = useState(null);
     const [resultRevealed, setResultRevealed] = useState(false);
     const [celebration, setCelebration] = useState(null); // 'confetti' | 'petals' | null
     const winCountRef = useRef(0);
@@ -274,6 +275,30 @@ export default function Battle({ totalPokemon }) {
         }
     };
 
+    const rollGachaTier = () => {
+        const r = Math.random();
+        if (r < GACHA_TIERS.legendary.chance) return 'legendary';
+        if (r < GACHA_TIERS.legendary.chance + GACHA_TIERS.secondEvo.chance) return 'secondEvo';
+        return 'common';
+    };
+
+    const fetchGachaPokemon = async (tierKey) => {
+        if (tierKey === 'legendary') {
+            const name = LEGENDARY_DROP_POOL[Math.floor(Math.random() * LEGENDARY_DROP_POOL.length)];
+            const res = await fetch(`/api/tarung/find?names=${encodeURIComponent(name)}`);
+            const data = await res.json();
+            return data[0] || null;
+        }
+        if (tierKey === 'secondEvo') {
+            const res = await fetch('/api/tarung/random?count=1&has_evolved=1');
+            const data = await res.json();
+            return data[0] || null;
+        }
+        const res = await fetch('/api/tarung/random?count=1&no_evolution=1');
+        const data = await res.json();
+        return data[0] || null;
+    };
+
     const returnToLobbyAfterWin = async () => {
         setVictoryBurst({ title: `${rivalTrainer?.name || 'Trainer'} Terkalahkan!`, subtitle: 'Timmu dipulihkan sepenuhnya' });
         await sleep(1500);
@@ -291,13 +316,13 @@ export default function Battle({ totalPokemon }) {
 
         setLastOutcome('won');
 
-        if (winCountRef.current % DROP_EVERY_N_WINS === 0 && Math.random() < DROP_CHANCE) {
+        if (winCountRef.current % DROP_EVERY_N_WINS === 0) {
             try {
-                const name = LEGENDARY_DROP_POOL[Math.floor(Math.random() * LEGENDARY_DROP_POOL.length)];
-                const res = await fetch(`/api/tarung/find?names=${encodeURIComponent(name)}`);
-                const data = await res.json();
-                if (data[0]) {
-                    setDroppedPokemon(data[0]);
+                const tierKey = rollGachaTier();
+                const pokemon = await fetchGachaPokemon(tierKey);
+                if (pokemon) {
+                    setDroppedPokemon(pokemon);
+                    setDropTier(GACHA_TIERS[tierKey]);
                     setPhase('legendary-drop');
                     return;
                 }
@@ -351,8 +376,6 @@ export default function Battle({ totalPokemon }) {
         setActiveIndex(0);
 
         setEvolvesUsed((prev) => prev + 1);
-        setLevelIndex(0);
-        setClearedLevels([]);
         setLastOutcome(null);
         setEvolveSelection(null);
         setPhase('challenge-lobby');
@@ -374,11 +397,13 @@ export default function Battle({ totalPokemon }) {
         setActiveIndex(0);
 
         setDroppedPokemon(null);
+        setDropTier(null);
         setPhase('challenge-lobby');
     };
 
     const skipDrop = () => {
         setDroppedPokemon(null);
+        setDropTier(null);
         setPhase('challenge-lobby');
     };
 
@@ -698,7 +723,7 @@ export default function Battle({ totalPokemon }) {
                 {phase === 'evolve-select' && (
                     <div>
                         <h2 className="text-xl font-bold text-center mb-1">Pilih Pokemon untuk Evolusi</h2>
-                        <p className="text-slate-500 text-center text-sm mb-6">Progres level akan reset ke awal, tapi timmu jadi lebih kuat.</p>
+                        <p className="text-slate-500 text-center text-sm mb-6">Progres levelmu tetap lanjut, timmu jadi lebih kuat.</p>
                         <EvolveSelect
                             team={team}
                             evolutions={evolutionOptions}
@@ -723,9 +748,10 @@ export default function Battle({ totalPokemon }) {
                     </div>
                 )}
 
-                {phase === 'legendary-drop' && droppedPokemon && (
+                {phase === 'legendary-drop' && droppedPokemon && dropTier && (
                     <LegendaryDropCard
                         pokemon={droppedPokemon}
+                        tier={dropTier}
                         team={team}
                         onReplace={replaceWithDrop}
                         onSkip={skipDrop}

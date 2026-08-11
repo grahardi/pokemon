@@ -1,11 +1,16 @@
 import { TYPE_COLORS } from '../../data/typeChart';
 
-export default function LegendaryDropCard({ pokemon, team, onReplace, onSkip }) {
+export default function LegendaryDropCard({ pokemon, tier, team, onReplace, onSkip }) {
     return (
         <div className="max-w-lg mx-auto">
-            <div className="bg-gradient-to-br from-amber-300 via-yellow-200 to-amber-100 rounded-2xl p-1 shadow-xl mb-6">
+            <div
+                className="rounded-2xl p-1 shadow-xl mb-6"
+                style={{ background: `linear-gradient(135deg, ${tier.color}, #FEF3C7)` }}
+            >
                 <div className="bg-white rounded-2xl p-6 text-center">
-                    <div className="text-sm font-bold text-amber-500 mb-1">🌟 POKEMON LEGENDARIS DITEMUKAN! 🌟</div>
+                    <div className="text-sm font-bold mb-1" style={{ color: tier.color }}>
+                        {tier.emoji} {tier.label.toUpperCase()} DITEMUKAN! {tier.emoji}
+                    </div>
                     <img src={pokemon.image} alt={pokemon.name} className="w-32 h-32 object-contain mx-auto" />
                     <h3 className="font-extrabold text-xl text-slate-800 mt-2">{pokemon.name}</h3>
                     <div className="flex justify-center gap-1 mt-2">
