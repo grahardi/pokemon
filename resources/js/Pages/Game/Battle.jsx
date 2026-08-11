@@ -71,6 +71,7 @@ export default function Battle({ totalPokemon }) {
     const winnerRef = useRef(null);
     const winCountRef = useRef(0);
     const logEndRef = useRef(null);
+    const topRef = useRef(null);
 
     const addLog = (msg) => {
         setLog((prev) => [...prev, msg]);
@@ -83,6 +84,13 @@ export default function Battle({ totalPokemon }) {
             .then(setTrainers)
             .catch(() => setTrainers([]));
     }, []);
+
+    useEffect(() => {
+        // Battle log auto-scroll halaman ke bawah selama pertarungan; tiap kali
+        // fase berganti (mis. masuk layar hasil/lobi), balikin scroll ke atas
+        // dulu supaya konten baru tidak kepotong.
+        topRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }, [phase]);
 
     useEffect(() => {
         if (phase === 'stage-result') {
@@ -566,6 +574,7 @@ export default function Battle({ totalPokemon }) {
             <Head title="Arena Tarung" />
 
             <div className="max-w-3xl mx-auto px-4 py-6">
+                <div ref={topRef} />
                 <div className="flex items-center justify-between mb-6">
                     <a href="/" className="text-slate-500 hover:text-slate-700 text-sm">&larr; Kembali ke situs</a>
                     <span className="text-xs text-slate-400">{totalPokemon}+ Pokemon siap bertarung</span>
