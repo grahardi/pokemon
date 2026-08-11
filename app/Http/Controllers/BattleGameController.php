@@ -36,6 +36,7 @@ class BattleGameController extends Controller
         $excludeIds = array_filter(explode(',', $request->get('exclude', '')));
         $minBst = $request->get('min_bst');
         $maxBst = $request->get('max_bst');
+        $evolvableOnly = $request->boolean('evolvable_only');
 
         $query = Pokemon::query()
             ->when($excludeIds, fn ($q) => $q->whereNotIn('id', $excludeIds));
@@ -45,6 +46,17 @@ class BattleGameController extends Controller
                 '(hp + attack + defense + sp_attack + sp_defense + speed) BETWEEN ? AND ?',
                 [$minBst ?: 0, $maxBst ?: 9999]
             );
+        }
+
+        if ($evolvableOnly) {
+            // Hanya Pokemon yang masih punya evolusi berikutnya (bukan bentuk akhir),
+            // supaya fitur Evolusi di mode Challenge selalu bisa dipakai.
+            $evolvableDex = Pokemon::query()
+                ->whereNotNull('evolves_from')
+                ->pluck('evolves_from')
+                ->unique();
+
+            $query->whereIn('dex_number', $evolvableDex);
         }
 
         $pokemons = $query->inRandomOrder()->take($count)->get();

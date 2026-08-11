@@ -113,7 +113,7 @@ export default function Battle({ totalPokemon }) {
                 setChoices(await res.json());
                 setPhase('select');
             } else {
-                const res = await fetch('/api/tarung/random?count=6');
+                const res = await fetch('/api/tarung/random?count=6&evolvable_only=1');
                 setChoices(await res.json());
                 setTeamSelection([]);
                 setPhase('team-select');
