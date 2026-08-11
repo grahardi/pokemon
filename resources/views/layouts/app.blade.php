@@ -164,6 +164,7 @@
                     <li class="nav-item"><a class="nav-link {{ request()->routeIs('pokemon.*') ? 'fw-bold' : '' }}" href="{{ route('pokemon.index') }}">Katalog Pokemon</a></li>
                     <li class="nav-item"><a class="nav-link {{ request()->routeIs('news.*') ? 'fw-bold' : '' }}" href="{{ route('news.index') }}">Berita</a></li>
                     <li class="nav-item"><a class="nav-link {{ request()->routeIs('games.*') ? 'fw-bold' : '' }}" href="{{ route('games.index') }}">Game</a></li>
+                    <li class="nav-item"><a class="nav-link {{ request()->routeIs('battle.*') ? 'fw-bold' : '' }}" href="{{ route('battle.index') }}"><i class="bi bi-lightning-fill text-warning"></i> Arena Tarung</a></li>
                 </ul>
             </div>
         </div>

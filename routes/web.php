@@ -5,6 +5,7 @@ use App\Http\Controllers\Admin\GameController as AdminGameController;
 use App\Http\Controllers\Admin\NewsController as AdminNewsController;
 use App\Http\Controllers\Admin\PokemonController as AdminPokemonController;
 use App\Http\Controllers\Auth\LoginController;
+use App\Http\Controllers\BattleGameController;
 use App\Http\Controllers\GameController;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\NewsController;
@@ -27,6 +28,10 @@ Route::prefix('game')->name('games.')->group(function () {
     Route::get('/', [GameController::class, 'index'])->name('index');
     Route::get('/{game}', [GameController::class, 'show'])->name('show');
 });
+
+// --- Game Battle vs Bot ---
+Route::get('/tarung', [BattleGameController::class, 'index'])->name('battle.index');
+Route::get('/api/tarung/random', [BattleGameController::class, 'randomPokemon'])->name('battle.random');
 
 // --- Autentikasi Admin ---
 Route::middleware('guest')->group(function () {
