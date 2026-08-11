@@ -118,8 +118,8 @@ export default function Battle({ totalPokemon }) {
 
     // ---------- Navigasi awal ----------
 
-    const confirmTrainer = () => {
-        if (!trainer) { setError('Pilih trainer dulu ya!'); return; }
+    const pickTrainerAndContinue = (t) => {
+        setTrainer(t);
         setError('');
         setPhase('nickname');
     };
@@ -572,14 +572,11 @@ export default function Battle({ totalPokemon }) {
                 </div>
 
                 {phase === 'trainer' && (
-                    <div className="max-w-lg mx-auto mt-8">
+                    <div className="max-w-lg mx-auto mt-4">
                         <h1 className="text-3xl font-extrabold text-center mb-1">⚔️ Arena Tarung</h1>
-                        <p className="text-slate-500 text-center text-sm mb-6">Pilih avatar trainer-mu:</p>
-                        <TrainerSelect trainers={trainers} selected={trainer} onSelect={setTrainer} />
+                        <p className="text-slate-500 text-center text-sm mb-4">Ketuk kartu untuk pilih trainer-mu:</p>
+                        <TrainerSelect trainers={trainers} onPick={pickTrainerAndContinue} />
                         {error && <p className="text-red-500 text-sm text-center mt-3">{error}</p>}
-                        <button onClick={confirmTrainer} className="w-full bg-red-500 hover:bg-red-600 text-white font-bold py-3 rounded-xl mt-6 shadow-lg transition">
-                            Lanjut
-                        </button>
                     </div>
                 )}
 

@@ -61,3 +61,7 @@
     100% { transform: translateY(320px) translateX(-12px) rotate(320deg); opacity: 0; }
 }
 .animate-petal-fall { animation-name: petal-fall; animation-timing-function: ease-in; animation-fill-mode: forwards; }
+
+/* Sembunyikan scrollbar tapi tetap scrollable (buat carousel geser trainer) */
+.scrollbar-hide::-webkit-scrollbar { display: none; }
+.scrollbar-hide { -ms-overflow-style: none; scrollbar-width: none; }
