@@ -49,14 +49,16 @@ class BattleGameController extends Controller
         }
 
         if ($evolvableOnly) {
-            // Hanya Pokemon yang masih punya evolusi berikutnya (bukan bentuk akhir),
-            // supaya fitur Evolusi di mode Challenge selalu bisa dipakai.
+            // Hanya Pokemon bentuk dasar (belum pernah evolusi) yang masih punya
+            // evolusi berikutnya — supaya pilihan tim awal selalu "level 1" murni,
+            // bukan Pokemon yang sudah evolusi sebagian (mis. Ivysaur) atau legendaris.
             $evolvableDex = Pokemon::query()
                 ->whereNotNull('evolves_from')
                 ->pluck('evolves_from')
                 ->unique();
 
-            $query->whereIn('dex_number', $evolvableDex);
+            $query->whereIn('dex_number', $evolvableDex)
+                ->whereNull('evolves_from');
         }
 
         $pokemons = $query->inRandomOrder()->take($count)->get();
