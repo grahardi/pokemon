@@ -5,6 +5,7 @@ use App\Http\Controllers\Admin\GameController as AdminGameController;
 use App\Http\Controllers\Admin\NewsController as AdminNewsController;
 use App\Http\Controllers\Admin\GachaSettingController as AdminGachaSettingController;
 use App\Http\Controllers\Admin\PokemonController as AdminPokemonController;
+use App\Http\Controllers\Admin\SoundSettingController as AdminSoundSettingController;
 use App\Http\Controllers\Admin\TrainerController as AdminTrainerController;
 use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\BattleGameController;
@@ -37,6 +38,7 @@ Route::get('/api/tarung/random', [BattleGameController::class, 'randomPokemon'])
 Route::get('/api/tarung/find', [BattleGameController::class, 'findByName'])->name('battle.find');
 Route::get('/api/tarung/evolutions', [BattleGameController::class, 'evolutions'])->name('battle.evolutions');
 Route::get('/api/tarung/gacha-roll', [BattleGameController::class, 'gachaRoll'])->name('battle.gacha-roll');
+Route::get('/api/tarung/sounds', [BattleGameController::class, 'sounds'])->name('battle.sounds');
 Route::get('/api/tarung/trainers', [BattleGameController::class, 'trainers'])->name('battle.trainers');
 
 // --- Autentikasi Admin ---
@@ -56,6 +58,10 @@ Route::middleware('auth')->prefix('admin')->name('admin.')->group(function () {
 
     Route::get('gacha', [AdminGachaSettingController::class, 'edit'])->name('gacha.edit');
     Route::put('gacha', [AdminGachaSettingController::class, 'update'])->name('gacha.update');
+
+    Route::get('sound', [AdminSoundSettingController::class, 'edit'])->name('sound.edit');
+    Route::post('sound', [AdminSoundSettingController::class, 'update'])->name('sound.update');
+    Route::post('sound/reset', [AdminSoundSettingController::class, 'reset'])->name('sound.reset');
 
     Route::get('pokemon', [AdminPokemonController::class, 'index'])->name('pokemon.index');
     Route::get('pokemon/{pokemon}/edit', [AdminPokemonController::class, 'edit'])->name('pokemon.edit');

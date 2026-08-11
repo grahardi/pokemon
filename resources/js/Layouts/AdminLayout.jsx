@@ -7,6 +7,7 @@ const navItems = [
     { href: '/admin/pokemon', label: 'Katalog Pokemon', icon: '📕' },
     { href: '/admin/trainers', label: 'Trainer (Arena Tarung)', icon: '⚔️' },
     { href: '/admin/gacha', label: 'Pengaturan Gacha', icon: '🎰' },
+    { href: '/admin/sound', label: 'Pengaturan Suara', icon: '🔊' },
 ];
 
 export default function AdminLayout({ children, title }) {

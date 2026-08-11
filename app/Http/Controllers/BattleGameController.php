@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\GachaSetting;
 use App\Models\Pokemon;
+use App\Models\SoundSetting;
 use App\Models\Trainer;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
@@ -25,6 +26,22 @@ class BattleGameController extends Controller
         return response()->json(
             Trainer::query()->active()->orderBy('order')->get()
         );
+    }
+
+    /**
+     * URL suara custom yang di-upload admin (kalau ada), dipakai frontend
+     * sebagai pengganti suara sintesis default.
+     */
+    public function sounds()
+    {
+        $setting = SoundSetting::current();
+
+        return response()->json([
+            'attack' => $setting->attack_sound_url,
+            'hit' => $setting->hit_sound_url,
+            'win' => $setting->win_sound_url,
+            'lose' => $setting->lose_sound_url,
+        ]);
     }
 
     /**

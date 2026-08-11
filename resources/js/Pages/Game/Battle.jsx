@@ -17,7 +17,7 @@ import { TYPE_COLORS } from '../../data/typeChart';
 import { CHALLENGE_LEVELS } from '../../data/challengeLevels';
 import { LEGENDARY_DROP_POOL, DROP_EVERY_N_WINS, GACHA_TIERS } from '../../data/legendaryDrops';
 import { battleMaxHp, calculateDamage, pickBotMove, effectivenessLabel } from '../../lib/battleEngine';
-import { unlockAudio, playAttackSound, playHitSound, playWinSound, playLoseSound } from '../../lib/sfx';
+import { unlockAudio, setCustomSounds, playAttackSound, playHitSound, playWinSound, playLoseSound } from '../../lib/sfx';
 
 const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 
@@ -83,6 +83,11 @@ export default function Battle({ totalPokemon }) {
             .then((res) => res.json())
             .then(setTrainers)
             .catch(() => setTrainers([]));
+
+        fetch('/api/tarung/sounds')
+            .then((res) => res.json())
+            .then(setCustomSounds)
+            .catch(() => {});
     }, []);
 
     useEffect(() => {
