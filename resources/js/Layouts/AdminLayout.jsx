@@ -6,6 +6,7 @@ const navItems = [
     { href: '/admin/games', label: 'Game', icon: '🎮' },
     { href: '/admin/pokemon', label: 'Katalog Pokemon', icon: '📕' },
     { href: '/admin/trainers', label: 'Trainer (Arena Tarung)', icon: '⚔️' },
+    { href: '/admin/gacha', label: 'Pengaturan Gacha', icon: '🎰' },
 ];
 
 export default function AdminLayout({ children, title }) {

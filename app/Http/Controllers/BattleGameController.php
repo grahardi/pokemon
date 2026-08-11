@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\GachaSetting;
 use App\Models\Pokemon;
 use App\Models\Trainer;
 use Illuminate\Http\Request;
@@ -24,6 +25,43 @@ class BattleGameController extends Controller
         return response()->json(
             Trainer::query()->active()->orderBy('order')->get()
         );
+    }
+
+    /**
+     * Roll tier gacha server-side berdasarkan persentase yang diatur admin
+     * (/admin/gacha). Dipakai mode Challenge tiap kelipatan 3x menang.
+     */
+    public function gachaRoll()
+    {
+        $settings = GachaSetting::current();
+
+        $weights = [
+            'legendary' => max(0, $settings->legendary_percent),
+            'secondEvo' => max(0, $settings->second_evo_percent),
+            'nonEvo' => max(0, $settings->non_evo_percent),
+            'bonusEvolution' => max(0, $settings->bonus_evolution_percent),
+        ];
+
+        $total = array_sum($weights);
+
+        if ($total <= 0) {
+            $weights = ['legendary' => 10, 'secondEvo' => 20, 'nonEvo' => 30, 'bonusEvolution' => 50];
+            $total = 110;
+        }
+
+        $roll = mt_rand(1, $total);
+        $cumulative = 0;
+        $tier = 'nonEvo';
+
+        foreach ($weights as $key => $weight) {
+            $cumulative += $weight;
+            if ($roll <= $cumulative) {
+                $tier = $key;
+                break;
+            }
+        }
+
+        return response()->json(['tier' => $tier]);
     }
 
     /**

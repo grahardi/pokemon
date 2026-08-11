@@ -9,8 +9,8 @@ import ModeSelect from '../../Components/Game/ModeSelect';
 import LevelBanner from '../../Components/Game/LevelBanner';
 import LevelTrack from '../../Components/Game/LevelTrack';
 import EvolveSelect from '../../Components/Game/EvolveSelect';
-import VictoryBurst from '../../Components/Game/VictoryBurst';
 import LegendaryDropCard from '../../Components/Game/LegendaryDropCard';
+import TrainerDuelResult from '../../Components/Game/TrainerDuelResult';
 import Confetti from '../../Components/Game/Confetti';
 import PetalFall from '../../Components/Game/PetalFall';
 import { TYPE_COLORS } from '../../data/typeChart';
@@ -21,14 +21,10 @@ import { unlockAudio, playAttackSound, playHitSound, playWinSound, playLoseSound
 
 const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 
-function randomPick(arr, n) {
-    const shuffled = [...arr].sort(() => Math.random() - 0.5);
-    return shuffled.slice(0, n);
-}
-
 export default function Battle({ totalPokemon }) {
     const [phase, setPhase] = useState('trainer');
-    // trainer | nickname | mode | select | team-select | battle | result | challenge-lobby | evolve-select
+    // trainer | nickname | mode | select | team-select | battle | result | challenge-lobby
+    // | stage-result | evolve-select | legendary-drop
     const [trainers, setTrainers] = useState([]);
     const [trainer, setTrainer] = useState(null);
     const [rivalTrainer, setRivalTrainer] = useState(null);
@@ -49,22 +45,17 @@ export default function Battle({ totalPokemon }) {
     const [levelIndex, setLevelIndex] = useState(0);
     const [clearedLevels, setClearedLevels] = useState([]);
     const [winCount, setWinCount] = useState(0);
-    const [evolvesUsed, setEvolvesUsed] = useState(0);
     const [lastOutcome, setLastOutcome] = useState(null); // 'won' | 'lost' | null
-    const [challengeResult, setChallengeResult] = useState(null);
-    const [victoryBurst, setVictoryBurst] = useState(null);
+    const [stageOutcome, setStageOutcome] = useState(null); // 'won' | 'lost' | null (utk layar stage-result)
 
     const [evolutionOptions, setEvolutionOptions] = useState({});
-    const [evolveSelection, setEvolveSelection] = useState(null); // {slotIndex, target}
+    const [evolveSelection, setEvolveSelection] = useState(null);
 
     const [droppedPokemon, setDroppedPokemon] = useState(null);
     const [dropTier, setDropTier] = useState(null);
-    const [resultRevealed, setResultRevealed] = useState(false);
-    const [celebration, setCelebration] = useState(null); // 'confetti' | 'petals' | null
-    const winCountRef = useRef(0);
 
-    const [cooldowns, setCooldowns] = useState({});
-    const cooldownsRef = useRef({});
+    const [resultRevealed, setResultRevealed] = useState(false);
+    const [celebration, setCelebration] = useState(null);
 
     const [log, setLog] = useState([]);
     const [busy, setBusy] = useState(false);
@@ -78,6 +69,7 @@ export default function Battle({ totalPokemon }) {
     const botTeamHpRef = useRef([]);
     const botActiveIndexRef = useRef(0);
     const winnerRef = useRef(null);
+    const winCountRef = useRef(0);
     const logEndRef = useRef(null);
 
     const addLog = (msg) => {
@@ -93,6 +85,11 @@ export default function Battle({ totalPokemon }) {
     }, []);
 
     useEffect(() => {
+        if (phase === 'stage-result') {
+            if (stageOutcome === 'won') playWinSound(); else playLoseSound();
+            return;
+        }
+
         if (phase !== 'result') {
             setResultRevealed(false);
             setCelebration(null);
@@ -101,17 +98,12 @@ export default function Battle({ totalPokemon }) {
 
         setResultRevealed(false);
         setCelebration(null);
-
-        const won = mode === 'battle' ? winner === 'player' : challengeResult === 'won';
+        const won = winner === 'player';
 
         const timer = setTimeout(() => {
             setResultRevealed(true);
             setCelebration(won ? 'confetti' : 'petals');
-            if (won) {
-                playWinSound();
-            } else {
-                playLoseSound();
-            }
+            if (won) playWinSound(); else playLoseSound();
         }, 900);
 
         return () => clearTimeout(timer);
@@ -123,8 +115,6 @@ export default function Battle({ totalPokemon }) {
         if (source.length === 0) return null;
         return source[Math.floor(Math.random() * source.length)];
     };
-
-    const evolveTokens = Math.floor(winCount / 2) - evolvesUsed;
 
     // ---------- Navigasi awal ----------
 
@@ -188,8 +178,6 @@ export default function Battle({ totalPokemon }) {
             setLog([`Pertarungan dimulai! ${nickname} mengirim ${picked.name}, lawan mengirim ${botPokemon.name}!`]);
             setWinner(null);
             winnerRef.current = null;
-            cooldownsRef.current = {};
-            setCooldowns({});
             setPhase('battle');
         } catch (e) {
             setError('Gagal memuat lawan. Coba lagi.');
@@ -212,7 +200,7 @@ export default function Battle({ totalPokemon }) {
         const lvl = CHALLENGE_LEVELS[idx];
         if (lvl.isBoss) {
             const guaranteed = lvl.guaranteedBoss[Math.floor(Math.random() * lvl.guaranteedBoss.length)];
-            const support = randomPick(lvl.supportPool, 2);
+            const support = [...lvl.supportPool].sort(() => Math.random() - 0.5).slice(0, 2);
             const names = [guaranteed, ...support].join(',');
             const res = await fetch(`/api/tarung/find?names=${encodeURIComponent(names)}`);
             return await res.json();
@@ -233,11 +221,7 @@ export default function Battle({ totalPokemon }) {
         setClearedLevels([]);
         winCountRef.current = 0;
         setWinCount(0);
-        setEvolvesUsed(0);
-        setChallengeResult(null);
         setLastOutcome(null);
-        cooldownsRef.current = {};
-        setCooldowns({});
         setPhase('challenge-lobby');
     };
 
@@ -259,8 +243,6 @@ export default function Battle({ totalPokemon }) {
 
             activeIndexRef.current = 0;
             setActiveIndex(0);
-            cooldownsRef.current = {};
-            setCooldowns({});
 
             setLog([
                 `${CHALLENGE_LEVELS[idx].label}${rival ? ` — ${rival.name}` : ''} muncul!`,
@@ -268,6 +250,7 @@ export default function Battle({ totalPokemon }) {
             ]);
             setWinner(null);
             winnerRef.current = null;
+            setStageOutcome(null);
             setPhase('battle');
         } catch (e) {
             setError('Gagal memuat lawan. Coba lagi.');
@@ -275,14 +258,9 @@ export default function Battle({ totalPokemon }) {
         }
     };
 
-    const rollGachaTier = () => {
-        const r = Math.random();
-        if (r < GACHA_TIERS.legendary.chance) return 'legendary';
-        if (r < GACHA_TIERS.legendary.chance + GACHA_TIERS.secondEvo.chance) return 'secondEvo';
-        return 'common';
-    };
+    // ---------- Gacha (merger dari sistem drop + evolusi) ----------
 
-    const fetchGachaPokemon = async (tierKey) => {
+    const fetchTierPokemon = async (tierKey) => {
         if (tierKey === 'legendary') {
             const name = LEGENDARY_DROP_POOL[Math.floor(Math.random() * LEGENDARY_DROP_POOL.length)];
             const res = await fetch(`/api/tarung/find?names=${encodeURIComponent(name)}`);
@@ -299,65 +277,45 @@ export default function Battle({ totalPokemon }) {
         return data[0] || null;
     };
 
-    const returnToLobbyAfterWin = async () => {
-        setVictoryBurst({ title: `${rivalTrainer?.name || 'Trainer'} Terkalahkan!`, subtitle: 'Timmu dipulihkan sepenuhnya' });
-        await sleep(1500);
-        setVictoryBurst(null);
+    const triggerGacha = async () => {
+        try {
+            const res = await fetch('/api/tarung/gacha-roll');
+            const { tier } = await res.json();
 
-        setClearedLevels((prev) => (prev.includes(levelIndex) ? prev : [...prev, levelIndex]));
-        winCountRef.current += 1;
-        setWinCount(winCountRef.current);
+            if (tier === 'bonusEvolution') {
+                const dexList = team.map((p) => p.dex_number).join(',');
+                const evoRes = await fetch(`/api/tarung/evolutions?dex=${dexList}`);
+                const evoData = await evoRes.json();
+                const hasAny = Object.values(evoData).some((arr) => arr.length > 0);
 
-        const healedHp = team.map((p) => battleMaxHp(p));
-        teamHpRef.current = healedHp;
-        setTeamHp(healedHp);
-        activeIndexRef.current = 0;
-        setActiveIndex(0);
-
-        setLastOutcome('won');
-
-        if (winCountRef.current % DROP_EVERY_N_WINS === 0) {
-            try {
-                const tierKey = rollGachaTier();
-                const pokemon = await fetchGachaPokemon(tierKey);
-                if (pokemon) {
-                    setDroppedPokemon(pokemon);
-                    setDropTier(GACHA_TIERS[tierKey]);
-                    setPhase('legendary-drop');
+                if (hasAny) {
+                    setEvolutionOptions(evoData);
+                    setEvolveSelection(null);
+                    setPhase('evolve-select');
                     return;
                 }
-            } catch (e) {
-                // Kalau gagal fetch drop, lanjut ke lobi seperti biasa
+
+                // Fallback: kalau seluruh tim sudah bentuk akhir, kasih Pokemon non-evolusi saja
+                const fallback = await fetchTierPokemon('nonEvo');
+                if (fallback) {
+                    setDroppedPokemon(fallback);
+                    setDropTier(GACHA_TIERS.nonEvo);
+                    setPhase('legendary-drop');
+                } else {
+                    setPhase('challenge-lobby');
+                }
+                return;
             }
-        }
 
-        setPhase('challenge-lobby');
-    };
-
-    const returnToLobbyAfterLoss = async () => {
-        await sleep(800);
-        const healedHp = team.map((p) => battleMaxHp(p));
-        teamHpRef.current = healedHp;
-        setTeamHp(healedHp);
-        activeIndexRef.current = 0;
-        setActiveIndex(0);
-
-        setLastOutcome('lost');
-        setPhase('challenge-lobby');
-    };
-
-    // ---------- Evolusi ----------
-
-    const openEvolveSelect = async () => {
-        setPhase('loading');
-        try {
-            const dexList = team.map((p) => p.dex_number).join(',');
-            const res = await fetch(`/api/tarung/evolutions?dex=${dexList}`);
-            setEvolutionOptions(await res.json());
-            setEvolveSelection(null);
-            setPhase('evolve-select');
+            const pokemon = await fetchTierPokemon(tier);
+            if (pokemon) {
+                setDroppedPokemon(pokemon);
+                setDropTier(GACHA_TIERS[tier]);
+                setPhase('legendary-drop');
+            } else {
+                setPhase('challenge-lobby');
+            }
         } catch (e) {
-            setError('Gagal memuat data evolusi.');
             setPhase('challenge-lobby');
         }
     };
@@ -375,13 +333,9 @@ export default function Battle({ totalPokemon }) {
         activeIndexRef.current = 0;
         setActiveIndex(0);
 
-        setEvolvesUsed((prev) => prev + 1);
-        setLastOutcome(null);
         setEvolveSelection(null);
         setPhase('challenge-lobby');
     };
-
-    // ---------- Drop Legendaris ----------
 
     const replaceWithDrop = (slotIndex) => {
         if (!droppedPokemon) return;
@@ -407,6 +361,34 @@ export default function Battle({ totalPokemon }) {
         setPhase('challenge-lobby');
     };
 
+    // ---------- Layar hasil per-stage (2 avatar) ----------
+
+    const continueAfterStageResult = async () => {
+        winnerRef.current = null;
+
+        const healedHp = team.map((p) => battleMaxHp(p));
+        teamHpRef.current = healedHp;
+        setTeamHp(healedHp);
+        activeIndexRef.current = 0;
+        setActiveIndex(0);
+
+        if (stageOutcome === 'won') {
+            setLastOutcome('won');
+            setStageOutcome(null);
+
+            if (winCountRef.current % DROP_EVERY_N_WINS === 0) {
+                setPhase('loading');
+                await triggerGacha();
+                return;
+            }
+        } else {
+            setLastOutcome('lost');
+            setStageOutcome(null);
+        }
+
+        setPhase('challenge-lobby');
+    };
+
     // ---------- Engine pertarungan ----------
 
     const handleBotActiveFainted = async () => {
@@ -418,8 +400,12 @@ export default function Battle({ totalPokemon }) {
 
         const aliveIdx = botTeamHpRef.current.findIndex((hp) => hp > 0);
         if (aliveIdx === -1) {
-            winnerRef.current = 'player';
-            setWinner('player');
+            setClearedLevels((prev) => (prev.includes(levelIndex) ? prev : [...prev, levelIndex]));
+            winCountRef.current += 1;
+            setWinCount(winCountRef.current);
+            setStageOutcome('won');
+            winnerRef.current = 'stage';
+            setPhase('stage-result');
             return;
         }
 
@@ -437,8 +423,9 @@ export default function Battle({ totalPokemon }) {
 
         const aliveIdx = teamHpRef.current.findIndex((hp) => hp > 0);
         if (aliveIdx === -1) {
-            winnerRef.current = 'bot';
-            setWinner('bot');
+            setStageOutcome('lost');
+            winnerRef.current = 'stage';
+            setPhase('stage-result');
             return;
         }
 
@@ -501,6 +488,9 @@ export default function Battle({ totalPokemon }) {
         return false;
     };
 
+    const cooldownsRef = useRef({});
+    const [cooldowns, setCooldowns] = useState({});
+
     const applyCooldown = (pokemonId, moveName) => {
         const current = { ...(cooldownsRef.current[pokemonId] || {}) };
         Object.keys(current).forEach((k) => {
@@ -539,19 +529,10 @@ export default function Battle({ totalPokemon }) {
 
         setBusy(false);
 
-        if (winnerRef.current === 'player') {
-            if (mode === 'challenge') {
-                await returnToLobbyAfterWin();
-            } else {
-                setPhase('result');
-            }
-        } else if (winnerRef.current === 'bot') {
-            if (mode === 'challenge') {
-                await returnToLobbyAfterLoss();
-            } else {
-                setPhase('result');
-            }
+        if (winnerRef.current === 'player' || winnerRef.current === 'bot') {
+            setPhase('result');
         }
+        // winnerRef.current === 'stage' -> fase sudah di-set langsung di handler faint
     };
 
     const playAgain = () => {
@@ -563,8 +544,6 @@ export default function Battle({ totalPokemon }) {
         setRivalTrainer(null);
         setLog([]);
         setWinner(null);
-        setChallengeResult(null);
-        setVictoryBurst(null);
         winnerRef.current = null;
     };
 
@@ -692,16 +671,7 @@ export default function Battle({ totalPokemon }) {
                         <h2 className="text-xl font-bold text-center mb-1">Lobi Challenge</h2>
                         {lastOutcome === 'won' && <p className="text-green-600 text-center text-sm mb-1">🎉 Kamu menang! Timmu sudah dipulihkan.</p>}
                         {lastOutcome === 'lost' && <p className="text-red-500 text-center text-sm mb-1">💀 Timmu kalah, tapi sudah dipulihkan untuk coba lagi.</p>}
-                        <p className="text-slate-500 text-center text-sm mb-4">Total kemenangan: <span className="font-bold text-slate-700">{winCount}</span></p>
-
-                        {evolveTokens > 0 && (
-                            <button
-                                onClick={openEvolveSelect}
-                                className="w-full bg-gradient-to-r from-purple-500 to-pink-500 text-white font-bold py-3 rounded-xl mb-4 shadow-lg animate-pulse"
-                            >
-                                ✨ Evolusi Tersedia ({evolveTokens})! Klik untuk pilih Pokemon
-                            </button>
-                        )}
+                        <p className="text-slate-500 text-center text-sm mb-4">Total kemenangan: <span className="font-bold text-slate-700">{winCount}</span> &middot; Gacha tiap {DROP_EVERY_N_WINS}x menang</p>
 
                         <div className="flex gap-2 mb-4 justify-center">
                             {team.map((p) => (
@@ -722,8 +692,8 @@ export default function Battle({ totalPokemon }) {
 
                 {phase === 'evolve-select' && (
                     <div>
-                        <h2 className="text-xl font-bold text-center mb-1">Pilih Pokemon untuk Evolusi</h2>
-                        <p className="text-slate-500 text-center text-sm mb-6">Progres levelmu tetap lanjut, timmu jadi lebih kuat.</p>
+                        <h2 className="text-xl font-bold text-center mb-1">🧬 Bonus Evolusi!</h2>
+                        <p className="text-slate-500 text-center text-sm mb-6">Pilih Pokemon di timmu untuk dievolusikan. Progres levelmu tetap lanjut.</p>
                         <EvolveSelect
                             team={team}
                             evolutions={evolutionOptions}
@@ -758,12 +728,26 @@ export default function Battle({ totalPokemon }) {
                     />
                 )}
 
+                {phase === 'stage-result' && (
+                    <TrainerDuelResult
+                        playerTrainer={trainer}
+                        rivalTrainer={rivalTrainer}
+                        playerWon={stageOutcome === 'won'}
+                        title={stageOutcome === 'won' ? '🎉 Menang!' : '💀 Kalah!'}
+                        subtitle={
+                            stageOutcome === 'won'
+                                ? `${rivalTrainer?.name || 'Trainer'} berhasil dikalahkan!`
+                                : `Timmu kalah melawan ${rivalTrainer?.name || 'trainer'}. Coba lagi!`
+                        }
+                        onContinue={continueAfterStageResult}
+                    />
+                )}
+
                 {(phase === 'battle' || phase === 'result') && activePlayer && activeBot && (
                     <div>
                         {mode === 'challenge' && <LevelBanner level={currentLevel} />}
 
                         <div className="relative bg-gradient-to-b from-sky-400 to-emerald-300 rounded-2xl overflow-hidden h-72 mb-4 border-4 border-white shadow-lg">
-                            {victoryBurst && <VictoryBurst title={victoryBurst.title} subtitle={victoryBurst.subtitle} />}
                             {celebration === 'confetti' && <Confetti />}
                             {celebration === 'petals' && <PetalFall />}
 

@@ -14,6 +14,7 @@ class DatabaseSeeder extends Seeder
             GameSeeder::class,
             NewsSeeder::class,
             TrainerSeeder::class,
+            GachaSettingSeeder::class,
         ]);
     }
 }
