@@ -48,3 +48,16 @@
 }
 .animate-victory-pop { animation: victory-pop 0.6s cubic-bezier(0.34, 1.56, 0.64, 1); }
 .animate-sparkle { animation: sparkle-float 1.2s ease-out forwards; }
+
+@keyframes confetti-fall {
+    0% { transform: translateY(-20px) rotate(var(--rotate-from, 0deg)); opacity: 1; }
+    100% { transform: translateY(320px) rotate(calc(var(--rotate-from, 0deg) + 360deg)); opacity: 0; }
+}
+.animate-confetti-fall { animation-name: confetti-fall; animation-timing-function: linear; animation-fill-mode: forwards; }
+
+@keyframes petal-fall {
+    0% { transform: translateY(-20px) translateX(0) rotate(0deg); opacity: .9; }
+    50% { transform: translateY(150px) translateX(18px) rotate(160deg); }
+    100% { transform: translateY(320px) translateX(-12px) rotate(320deg); opacity: 0; }
+}
+.animate-petal-fall { animation-name: petal-fall; animation-timing-function: ease-in; animation-fill-mode: forwards; }

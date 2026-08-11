@@ -11,10 +11,13 @@ import LevelTrack from '../../Components/Game/LevelTrack';
 import EvolveSelect from '../../Components/Game/EvolveSelect';
 import VictoryBurst from '../../Components/Game/VictoryBurst';
 import LegendaryDropCard from '../../Components/Game/LegendaryDropCard';
+import Confetti from '../../Components/Game/Confetti';
+import PetalFall from '../../Components/Game/PetalFall';
 import { TYPE_COLORS } from '../../data/typeChart';
 import { CHALLENGE_LEVELS } from '../../data/challengeLevels';
 import { LEGENDARY_DROP_POOL, DROP_CHANCE, DROP_EVERY_N_WINS } from '../../data/legendaryDrops';
 import { battleMaxHp, calculateDamage, pickBotMove, effectivenessLabel } from '../../lib/battleEngine';
+import { unlockAudio, playAttackSound, playHitSound, playWinSound, playLoseSound } from '../../lib/sfx';
 
 const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 
@@ -55,6 +58,8 @@ export default function Battle({ totalPokemon }) {
     const [evolveSelection, setEvolveSelection] = useState(null); // {slotIndex, target}
 
     const [droppedPokemon, setDroppedPokemon] = useState(null);
+    const [resultRevealed, setResultRevealed] = useState(false);
+    const [celebration, setCelebration] = useState(null); // 'confetti' | 'petals' | null
     const winCountRef = useRef(0);
 
     const [cooldowns, setCooldowns] = useState({});
@@ -85,6 +90,31 @@ export default function Battle({ totalPokemon }) {
             .then(setTrainers)
             .catch(() => setTrainers([]));
     }, []);
+
+    useEffect(() => {
+        if (phase !== 'result') {
+            setResultRevealed(false);
+            setCelebration(null);
+            return;
+        }
+
+        setResultRevealed(false);
+        setCelebration(null);
+
+        const won = mode === 'battle' ? winner === 'player' : challengeResult === 'won';
+
+        const timer = setTimeout(() => {
+            setResultRevealed(true);
+            setCelebration(won ? 'confetti' : 'petals');
+            if (won) {
+                playWinSound();
+            } else {
+                playLoseSound();
+            }
+        }, 900);
+
+        return () => clearTimeout(timer);
+    }, [phase]);
 
     const pickRivalTrainer = (excludeId) => {
         const pool = trainers.filter((t) => t.id !== excludeId);
@@ -397,6 +427,7 @@ export default function Battle({ totalPokemon }) {
         const defender = side === 'player' ? botTeamRef.current[botActiveIndexRef.current] : team[activeIndexRef.current];
 
         setAttacking(side);
+        playAttackSound();
         addLog(`${side === 'player' ? nickname : 'Musuh'} (${attacker.name}) menggunakan ${move.name}!`);
         await sleep(500);
         setAttacking(null);
@@ -410,6 +441,7 @@ export default function Battle({ totalPokemon }) {
         }
 
         setHit(side === 'player' ? 'bot' : 'player');
+        playHitSound();
         await sleep(150);
 
         if (side === 'player') {
@@ -456,6 +488,7 @@ export default function Battle({ totalPokemon }) {
 
     const handleMove = async (move) => {
         if (busy || winnerRef.current) return;
+        unlockAudio();
 
         const activePlayerNow = team[activeIndexRef.current];
         const moveCooldown = cooldownsRef.current[activePlayerNow.id]?.[move.name] || 0;
@@ -705,6 +738,8 @@ export default function Battle({ totalPokemon }) {
 
                         <div className="relative bg-gradient-to-b from-sky-400 to-emerald-300 rounded-2xl overflow-hidden h-72 mb-4 border-4 border-white shadow-lg">
                             {victoryBurst && <VictoryBurst title={victoryBurst.title} subtitle={victoryBurst.subtitle} />}
+                            {celebration === 'confetti' && <Confetti />}
+                            {celebration === 'petals' && <PetalFall />}
 
                             <div className="absolute top-4 right-6 text-right">
                                 {rivalTrainer && (
@@ -724,7 +759,7 @@ export default function Battle({ totalPokemon }) {
                             />
 
                             <div className="absolute bottom-4 left-6">
-                                {trainer && mode === 'challenge' && (
+                                {trainer && (
                                     <div className="mb-1.5"><TrainerAvatarTag trainer={trainer} align="left" /></div>
                                 )}
                                 <div className="bg-white/90 rounded-lg px-3 py-1.5 text-slate-800 shadow mb-2 w-40">
@@ -764,16 +799,18 @@ export default function Battle({ totalPokemon }) {
                         </div>
 
                         {phase === 'result' ? (
-                            <div className="text-center bg-white rounded-2xl shadow-lg p-6">
-                                <h2 className="text-2xl font-extrabold mb-2">{winner === 'player' ? '🎉 Kamu Menang!' : '💀 Kamu Kalah!'}</h2>
-                                <p className="text-slate-500 mb-4">
-                                    {winner === 'player' ? `${activePlayer.name} berhasil mengalahkan ${activeBot.name}!` : `${activeBot.name} milik lawan terlalu kuat. Coba lagi!`}
-                                </p>
-                                <div className="flex gap-3 justify-center">
-                                    <button onClick={playAgain} className="bg-amber-400 hover:bg-amber-300 text-slate-900 font-bold px-6 py-3 rounded-lg">Main Lagi</button>
-                                    <button onClick={backToStart} className="bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold px-6 py-3 rounded-lg">Ganti Trainer</button>
+                            resultRevealed && (
+                                <div className="text-center bg-white rounded-2xl shadow-lg p-6 animate-victory-pop">
+                                    <h2 className="text-2xl font-extrabold mb-2">{winner === 'player' ? '🎉 Kamu Menang!' : '💀 Kamu Kalah!'}</h2>
+                                    <p className="text-slate-500 mb-4">
+                                        {winner === 'player' ? `${activePlayer.name} berhasil mengalahkan ${activeBot.name}!` : `${activeBot.name} milik lawan terlalu kuat. Coba lagi!`}
+                                    </p>
+                                    <div className="flex gap-3 justify-center">
+                                        <button onClick={playAgain} className="bg-amber-400 hover:bg-amber-300 text-slate-900 font-bold px-6 py-3 rounded-lg">Main Lagi</button>
+                                        <button onClick={backToStart} className="bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold px-6 py-3 rounded-lg">Ganti Trainer</button>
+                                    </div>
                                 </div>
-                            </div>
+                            )
                         ) : (
                             <div className="grid grid-cols-2 gap-3">
                                 {activePlayer.moves.map((move) => {
