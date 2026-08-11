@@ -4,7 +4,7 @@ export default function TrainerAvatarTag({ trainer, align = 'left' }) {
     return (
         <div className={`flex items-center gap-1.5 ${align === 'right' ? 'flex-row-reverse' : ''}`}>
             <div
-                className="w-7 h-7 rounded-full flex items-center justify-center overflow-hidden shrink-0 border-2 border-white shadow"
+                className="w-7 h-9 rounded-md flex items-center justify-center overflow-hidden shrink-0 border-2 border-white shadow"
                 style={{ background: `linear-gradient(135deg, ${trainer.gradient_from}, ${trainer.gradient_to})` }}
             >
                 {trainer.image_url ? (

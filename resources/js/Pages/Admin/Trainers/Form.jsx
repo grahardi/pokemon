@@ -1,5 +1,6 @@
 import AdminLayout from '../../../Layouts/AdminLayout';
 import { useForm } from '@inertiajs/react';
+import { useState, useEffect } from 'react';
 
 const ICON_OPTIONS = [
     'bi-award-fill', 'bi-shield-fill', 'bi-mountain', 'bi-lightning-charge-fill',
@@ -9,6 +10,7 @@ const ICON_OPTIONS = [
 
 export default function Form({ trainer }) {
     const isEdit = !!trainer;
+    const [previewUrl, setPreviewUrl] = useState(trainer?.image_url || '');
 
     const { data, setData, post, put, processing, errors } = useForm({
         name: trainer?.name || '',
@@ -16,10 +18,30 @@ export default function Form({ trainer }) {
         icon: trainer?.icon || 'bi-person-fill',
         gradient_from: trainer?.gradient_from || '#EF4444',
         gradient_to: trainer?.gradient_to || '#3B82F6',
+        image: null,
         image_url: trainer?.image_url || '',
         order: trainer?.order ?? 0,
         is_active: trainer?.is_active ?? true,
     });
+
+    useEffect(() => {
+        if (data.image) {
+            const url = URL.createObjectURL(data.image);
+            setPreviewUrl(url);
+            return () => URL.revokeObjectURL(url);
+        }
+        setPreviewUrl(data.image_url || '');
+    }, [data.image, data.image_url]);
+
+    const handleFileChange = (e) => {
+        const file = e.target.files?.[0];
+        if (file) setData('image', file);
+    };
+
+    const removeUploadedImage = () => {
+        setData('image', null);
+        setData('image_url', '');
+    };
 
     const submit = (e) => {
         e.preventDefault();
@@ -58,15 +80,38 @@ export default function Form({ trainer }) {
                     </div>
 
                     <div>
-                        <label className="block text-sm font-medium text-slate-700 mb-1">URL Gambar Avatar (opsional)</label>
+                        <label className="block text-sm font-medium text-slate-700 mb-1">Upload Foto Avatar (opsional)</label>
+                        <input
+                            type="file"
+                            accept="image/*"
+                            onChange={handleFileChange}
+                            className="w-full text-sm rounded-lg border border-slate-300 file:mr-3 file:py-2 file:px-3 file:border-0 file:bg-slate-100 file:text-slate-700 file:font-medium hover:file:bg-slate-200"
+                        />
+                        <p className="text-xs text-slate-400 mt-1">
+                            Bisa foto full body — rasio potret seperti 4:6 cocok. Maks 4MB. Kosongkan untuk pakai ikon + gradient di bawah.
+                        </p>
+                        {errors.image && <p className="text-red-600 text-xs mt-1">{errors.image}</p>}
+                        {previewUrl && (
+                            <button
+                                type="button"
+                                onClick={removeUploadedImage}
+                                className="text-xs text-red-500 hover:underline mt-1"
+                            >
+                                Hapus gambar, pakai ikon saja
+                            </button>
+                        )}
+                    </div>
+
+                    <div>
+                        <label className="block text-sm font-medium text-slate-700 mb-1">Atau isi URL Gambar (alternatif upload)</label>
                         <input
                             type="text"
                             value={data.image_url}
                             onChange={(e) => setData('image_url', e.target.value)}
-                            placeholder="https://... (kosongkan untuk pakai ikon + gradient)"
-                            className="w-full rounded-lg border-slate-300 focus:border-red-500 focus:ring-red-500"
+                            placeholder="https://..."
+                            disabled={!!data.image}
+                            className="w-full rounded-lg border-slate-300 focus:border-red-500 focus:ring-red-500 disabled:bg-slate-50 disabled:text-slate-400"
                         />
-                        <p className="text-xs text-slate-400 mt-1">Kalau diisi, gambar ini dipakai menggantikan ikon di bawah.</p>
                     </div>
 
                     <div>
@@ -151,11 +196,11 @@ export default function Form({ trainer }) {
                         className="rounded-2xl p-5 text-center shadow"
                         style={{ background: `linear-gradient(135deg, ${data.gradient_from}, ${data.gradient_to})` }}
                     >
-                        <div className="w-16 h-16 rounded-full bg-white/20 flex items-center justify-center mx-auto mb-2 overflow-hidden">
-                            {data.image_url ? (
-                                <img src={data.image_url} alt={data.name} className="w-full h-full object-cover" />
+                        <div className="w-28 aspect-[4/6] rounded-xl bg-white/20 flex items-center justify-center mx-auto mb-3 overflow-hidden">
+                            {previewUrl ? (
+                                <img src={previewUrl} alt={data.name} className="w-full h-full object-cover" />
                             ) : (
-                                <i className={`bi ${data.icon} text-3xl text-white`}></i>
+                                <i className={`bi ${data.icon} text-4xl text-white`}></i>
                             )}
                         </div>
                         <div className="font-bold text-white">{data.name || 'Nama Trainer'}</div>

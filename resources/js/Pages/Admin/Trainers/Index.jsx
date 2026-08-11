@@ -43,13 +43,13 @@ export default function Index({ trainers }) {
                                 <td className="px-4 py-3 text-slate-400">{t.order}</td>
                                 <td className="px-4 py-3">
                                     {t.image_url ? (
-                                        <img src={t.image_url} alt={t.name} className="w-10 h-10 rounded-full object-cover" />
+                                        <img src={t.image_url} alt={t.name} className="w-8 aspect-[4/6] rounded-md object-cover" />
                                     ) : (
                                         <div
-                                            className="w-10 h-10 rounded-full flex items-center justify-center"
+                                            className="w-8 aspect-[4/6] rounded-md flex items-center justify-center"
                                             style={{ background: `linear-gradient(135deg, ${t.gradient_from}, ${t.gradient_to})` }}
                                         >
-                                            <i className={`bi ${t.icon} text-white`}></i>
+                                            <i className={`bi ${t.icon} text-white text-xs`}></i>
                                         </div>
                                     )}
                                 </td>

@@ -14,7 +14,17 @@ Dibangun dengan **Laravel 13**, **PostgreSQL**, dan **Bootstrap 5** (CDN, tanpa 
 - **Moveset**: diambil dari data mekanik game (nama skill, tipe, power, akurasi, PP — ini adalah data faktual, bukan teks kreatif) menggunakan versi game terakhir yang tersedia untuk tiap Pokemon di dataset sumber (PokeAPI/pokedex, hanya mencakup hingga Gen 8). Tidak mencakup egg moves atau tutor moves untuk menjaga scope tetap wajar.
 - **Sengaja tidak ada**: teks Pokedex resmi per game (flavor text) — itu teks kreatif berhak cipta Nintendo/Game Freak yang tidak direproduksi di situs ini.
 - **Deskripsi karakter**: kalimat pembuka (tipe & generasi) digenerate otomatis dari data. Deskripsi fisik/desain tiap Pokemon ditulis orisinal (bukan terjemahan dari pokemondb atau sumber lain), mencakup seluruh 905 Pokemon.
-- **Trainer Arena Tarung**: nama, gambar, dan warna avatar trainer sepenuhnya dikelola lewat panel admin (`/admin/trainers`) — bukan hardcode di kode. Kamu bertanggung jawab atas nama/gambar apa pun yang dimasukkan di sana.
+- **Trainer Arena Tarung**: nama, gambar, dan warna avatar trainer sepenuhnya dikelola lewat panel admin (`/admin/trainers`) — bisa upload foto langsung (rasio potret, cocok untuk foto full body) atau isi URL manual. Kamu bertanggung jawab atas nama/gambar apa pun yang dimasukkan di sana.
+
+### Setup upload gambar trainer (sekali saja)
+
+Upload foto trainer butuh symbolic link storage Laravel. Jalankan sekali di server:
+
+```bash
+php artisan storage:link
+```
+
+Tanpa ini, foto yang di-upload akan tersimpan tapi tidak bisa diakses lewat browser (404).
 - **Berita** (`/berita`) — artikel berita & info seputar Pokemon.
 - **Game** (`/game`) — daftar game utama Pokemon dari Gen 1–9 + Pokemon GO.
 - **Beranda** (`/`) — hero slider, Pokemon pilihan acak, berita terbaru.

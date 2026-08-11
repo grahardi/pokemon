@@ -430,7 +430,7 @@ export default function Battle({ totalPokemon }) {
                 {phase === 'nickname' && (
                     <div className="bg-white rounded-2xl shadow-lg p-8 text-center max-w-md mx-auto mt-16">
                         <div
-                            className="w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-3 overflow-hidden"
+                            className="w-24 aspect-[4/6] rounded-xl flex items-center justify-center mx-auto mb-3 overflow-hidden"
                             style={{ background: `linear-gradient(135deg, ${trainer?.gradient_from || '#EF4444'}, ${trainer?.gradient_to || '#3B82F6'})` }}
                         >
                             {trainer?.image_url ? (

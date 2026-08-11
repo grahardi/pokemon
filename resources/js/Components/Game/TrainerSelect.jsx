@@ -20,11 +20,11 @@ export default function TrainerSelect({ trainers, selected, onSelect }) {
                         }`}
                         style={{ background: `linear-gradient(135deg, ${t.gradient_from}, ${t.gradient_to})` }}
                     >
-                        <div className="w-14 h-14 rounded-full bg-white/20 flex items-center justify-center mx-auto mb-2 overflow-hidden">
+                        <div className="w-full aspect-[4/6] rounded-xl bg-white/20 flex items-center justify-center mx-auto mb-2 overflow-hidden">
                             {t.image_url ? (
                                 <img src={t.image_url} alt={t.name} className="w-full h-full object-cover" />
                             ) : (
-                                <i className={`bi ${t.icon} text-2xl text-white`}></i>
+                                <i className={`bi ${t.icon} text-3xl text-white`}></i>
                             )}
                         </div>
                         <div className="font-bold text-white text-sm">{t.name}</div>
