@@ -11,6 +11,20 @@
     </div>
     <div class="carousel-inner">
         <div class="carousel-item active">
+            <div class="hero-slide" style="background-image: linear-gradient(180deg, rgba(0,0,0,.15), rgba(0,0,0,.6)), url('{{ asset('images/hero-slide-2.jpg') }}');">
+                <div class="container h-100 d-flex align-items-end align-items-md-center pb-5 pb-md-0">
+                    <div class="hero-caption text-white">
+                        <span class="badge bg-danger mb-2 fs-6"><i class="bi bi-lightning-charge-fill"></i> Mode Baru!</span>
+                        <h1 class="display-5 fw-bold hero-title">Arena Tarung — Battle vs Bot!</h1>
+                        <p class="lead d-none d-md-block">Pilih trainer, susun tim Pokemon-mu, dan tembus gauntlet sampai boss Mewtwo/Arceus.</p>
+                        <a href="{{ route('battle.index') }}" class="btn btn-warning btn-lg fw-bold text-dark">
+                            <i class="bi bi-controller"></i> Mainkan Sekarang
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="carousel-item">
             <div class="hero-slide" style="background-image: linear-gradient(180deg, rgba(0,0,0,.15), rgba(0,0,0,.55)), url('{{ asset('images/hero-banner.jpg') }}');">
                 <div class="container h-100 d-flex align-items-end align-items-md-center pb-5 pb-md-0">
                     <div class="hero-caption text-white">
@@ -20,20 +34,6 @@
                             <i class="bi bi-search"></i> Jelajahi Katalog
                         </a>
                         <a href="{{ route('news.index') }}" class="btn btn-outline-light btn-lg">Baca Berita</a>
-                    </div>
-                </div>
-            </div>
-        </div>
-        <div class="carousel-item">
-            <div class="hero-slide" style="background-image: linear-gradient(180deg, rgba(0,0,0,.1), rgba(0,0,0,.6)), url('{{ asset('images/hero-slide-2.jpg') }}');">
-                <div class="container h-100 d-flex align-items-end align-items-md-center pb-5 pb-md-0">
-                    <div class="hero-caption text-white">
-                        <span class="badge bg-warning text-dark mb-2 fs-6"><i class="bi bi-collection"></i> {{ number_format($totalPokemon) }}+ Pokemon</span>
-                        <h1 class="display-5 fw-bold hero-title">Katalog Pokemon Terlengkap</h1>
-                        <p class="lead d-none d-md-block">Cari berdasarkan nama, nomor dex, atau tipe — lengkap dengan statistik tempur tiap Pokemon.</p>
-                        <a href="{{ route('pokemon.index') }}" class="btn btn-warning btn-lg fw-bold text-dark">
-                            <i class="bi bi-search"></i> Mulai Cari Pokemon
-                        </a>
                     </div>
                 </div>
             </div>
