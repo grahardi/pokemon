@@ -2,7 +2,11 @@
 // fallback ke suara sintesis Web Audio API (tanpa file eksternal sama sekali).
 
 let audioCtx = null;
-let customSounds = { attack: null, hit: null, win: null, lose: null };
+let customSounds = {
+    attack: null, hit: null, win: null, lose: null,
+    pick: null, battleStart: null, pokemonFaint: null, enemyFaint: null,
+    gacha: null, gachaLegendary: null,
+};
 
 function getCtx() {
     if (!audioCtx) {
@@ -113,4 +117,64 @@ export function playLoseSound() {
 
     const notes = [392, 349.23, 293.66, 261.63]; // menurun, terdengar sendu
     notes.forEach((freq, i) => playTone(freq, 0.35, 'sawtooth', i * 0.16, 0.14));
+}
+
+/**
+ * Suara saat trainer dipilih. Bisa override per-trainer (pick_sound_url),
+ * kalau tidak ada pakai default global, kalau masih tidak ada baru sintesis.
+ */
+export function playPickSound(overrideUrl) {
+    const url = overrideUrl || customSounds.pick;
+    if (url) return playCustom(url);
+
+    playTone(660, 0.1, 'sine', 0, 0.15);
+    playTone(880, 0.15, 'sine', 0.08, 0.18);
+}
+
+export function playBattleStartSound() {
+    if (customSounds.battleStart) return playCustom(customSounds.battleStart);
+
+    playTone(220, 0.12, 'sawtooth', 0, 0.15);
+    playTone(330, 0.12, 'sawtooth', 0.1, 0.15);
+    playTone(440, 0.25, 'square', 0.2, 0.18);
+}
+
+export function playPokemonFaintSound() {
+    if (customSounds.pokemonFaint) return playCustom(customSounds.pokemonFaint);
+
+    const notes = [440, 370, 293, 220];
+    notes.forEach((freq, i) => playTone(freq, 0.22, 'sine', i * 0.09, 0.13));
+}
+
+export function playEnemyFaintSound() {
+    if (customSounds.enemyFaint) return playCustom(customSounds.enemyFaint);
+
+    const notes = [440, 554, 659];
+    notes.forEach((freq, i) => playTone(freq, 0.18, 'triangle', i * 0.08, 0.16));
+}
+
+export function playGachaSound() {
+    if (customSounds.gacha) return playCustom(customSounds.gacha);
+
+    const notes = [523.25, 587.33, 659.25, 783.99];
+    notes.forEach((freq, i) => playTone(freq, 0.2, 'sine', i * 0.07, 0.14));
+}
+
+/**
+ * Suara spesial buat gacha tier Legendaris — lebih megah, lebih panjang,
+ * beberapa nada bertumpuk biar terasa "mewah".
+ */
+export function playGachaLegendarySound() {
+    if (customSounds.gachaLegendary) return playCustom(customSounds.gachaLegendary);
+
+    const ctx = getCtx();
+    if (!ctx) return;
+
+    // Arpeggio naik panjang
+    const notes = [392, 523.25, 659.25, 783.99, 1046.5, 1318.5];
+    notes.forEach((freq, i) => playTone(freq, 0.4, 'triangle', i * 0.1, 0.16));
+
+    // Lapisan drone rendah biar terasa lebih megah/gold
+    playTone(196, 1.2, 'sawtooth', 0, 0.08);
+    playTone(261.63, 1.2, 'sawtooth', 0.05, 0.06);
 }

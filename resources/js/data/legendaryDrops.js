@@ -12,8 +12,8 @@ export const DROP_EVERY_N_WINS = 3;
 // Metadata tampilan tiap tier gacha. Persentase-nya diatur admin (bukan hardcode di sini)
 // lewat /admin/gacha, dan di-roll server-side via endpoint /api/tarung/gacha-roll.
 export const GACHA_TIERS = {
-    legendary: { label: 'Legendaris', color: '#F59E0B', emoji: '🌟' },
-    secondEvo: { label: 'Evolusi Tahap 2', color: '#8B5CF6', emoji: '⭐' },
-    nonEvo: { label: 'Pokemon Baru', color: '#64748B', emoji: '🎁' },
-    bonusEvolution: { label: 'Bonus Evolusi', color: '#22C55E', emoji: '🧬' },
+    legendary: { key: 'legendary', label: 'Legendaris', color: '#F59E0B', emoji: '🌟' },
+    secondEvo: { key: 'secondEvo', label: 'Evolusi Tahap 2', color: '#8B5CF6', emoji: '⭐' },
+    nonEvo: { key: 'nonEvo', label: 'Pokemon Baru', color: '#64748B', emoji: '🎁' },
+    bonusEvolution: { key: 'bonusEvolution', label: 'Bonus Evolusi', color: '#22C55E', emoji: '🧬' },
 };

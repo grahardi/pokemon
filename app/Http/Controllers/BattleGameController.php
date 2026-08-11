@@ -41,6 +41,12 @@ class BattleGameController extends Controller
             'hit' => $setting->hit_sound_url,
             'win' => $setting->win_sound_url,
             'lose' => $setting->lose_sound_url,
+            'pick' => $setting->pick_sound_url,
+            'battleStart' => $setting->battle_start_sound_url,
+            'pokemonFaint' => $setting->pokemon_faint_sound_url,
+            'enemyFaint' => $setting->enemy_faint_sound_url,
+            'gacha' => $setting->gacha_sound_url,
+            'gachaLegendary' => $setting->gacha_legendary_sound_url,
         ]);
     }
 

@@ -55,6 +55,7 @@ Route::middleware('auth')->prefix('admin')->name('admin.')->group(function () {
     Route::resource('news', AdminNewsController::class)->except('show');
     Route::resource('games', AdminGameController::class)->except('show');
     Route::resource('trainers', AdminTrainerController::class)->except('show');
+    Route::post('trainers/{trainer}/reset-sound', [AdminTrainerController::class, 'resetSound'])->name('trainers.reset-sound');
 
     Route::get('gacha', [AdminGachaSettingController::class, 'edit'])->name('gacha.edit');
     Route::put('gacha', [AdminGachaSettingController::class, 'update'])->name('gacha.update');

@@ -16,6 +16,7 @@ class Trainer extends Model
         'gradient_from',
         'gradient_to',
         'image_url',
+        'pick_sound_url',
         'order',
         'is_active',
     ];

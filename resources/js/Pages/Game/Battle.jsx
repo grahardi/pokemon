@@ -17,7 +17,11 @@ import { TYPE_COLORS } from '../../data/typeChart';
 import { CHALLENGE_LEVELS } from '../../data/challengeLevels';
 import { LEGENDARY_DROP_POOL, DROP_EVERY_N_WINS, GACHA_TIERS } from '../../data/legendaryDrops';
 import { battleMaxHp, calculateDamage, pickBotMove, effectivenessLabel } from '../../lib/battleEngine';
-import { unlockAudio, setCustomSounds, playAttackSound, playHitSound, playWinSound, playLoseSound } from '../../lib/sfx';
+import {
+    unlockAudio, setCustomSounds, playAttackSound, playHitSound, playWinSound, playLoseSound,
+    playPickSound, playBattleStartSound, playPokemonFaintSound, playEnemyFaintSound,
+    playGachaSound, playGachaLegendarySound,
+} from '../../lib/sfx';
 
 const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 
@@ -132,6 +136,8 @@ export default function Battle({ totalPokemon }) {
     // ---------- Navigasi awal ----------
 
     const pickTrainerAndContinue = (t) => {
+        unlockAudio();
+        playPickSound(t.pick_sound_url);
         setTrainer(t);
         setError('');
         setPhase('nickname');
@@ -188,6 +194,7 @@ export default function Battle({ totalPokemon }) {
             setBotActiveIndex(0);
             setRivalTrainer(null);
 
+            playBattleStartSound();
             setLog([`Pertarungan dimulai! ${nickname} mengirim ${picked.name}, lawan mengirim ${botPokemon.name}!`]);
             setWinner(null);
             winnerRef.current = null;
@@ -257,6 +264,7 @@ export default function Battle({ totalPokemon }) {
             activeIndexRef.current = 0;
             setActiveIndex(0);
 
+            playBattleStartSound();
             setLog([
                 `${CHALLENGE_LEVELS[idx].label}${rival ? ` — ${rival.name}` : ''} muncul!`,
                 `${nickname} mengirim ${team[0].name}, lawan mengirim ${botTeamN[0].name}!`,
@@ -294,6 +302,12 @@ export default function Battle({ totalPokemon }) {
         try {
             const res = await fetch('/api/tarung/gacha-roll');
             const { tier } = await res.json();
+
+            if (tier === 'legendary') {
+                playGachaLegendarySound();
+            } else {
+                playGachaSound();
+            }
 
             if (tier === 'bonusEvolution') {
                 const dexList = team.map((p) => p.dex_number).join(',');
@@ -486,6 +500,7 @@ export default function Battle({ totalPokemon }) {
 
         if (side === 'player' && botTeamHpRef.current[botActiveIndexRef.current] <= 0) {
             addLog(`${defender.name} pingsan!`);
+            playEnemyFaintSound();
             await sleep(400);
             await handleBotActiveFainted();
             return true;
@@ -493,6 +508,7 @@ export default function Battle({ totalPokemon }) {
 
         if (side === 'bot' && teamHpRef.current[activeIndexRef.current] <= 0) {
             addLog(`${defender.name} pingsan!`);
+            playPokemonFaintSound();
             await sleep(400);
             await handlePlayerActiveFainted();
             return true;

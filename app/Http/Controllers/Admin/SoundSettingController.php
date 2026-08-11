@@ -12,7 +12,10 @@ use Inertia\Response;
 
 class SoundSettingController extends Controller
 {
-    private const SLOTS = ['attack', 'hit', 'win', 'lose'];
+    private const SLOTS = [
+        'attack', 'hit', 'win', 'lose',
+        'pick', 'battle_start', 'pokemon_faint', 'enemy_faint', 'gacha', 'gacha_legendary',
+    ];
 
     public function edit(): Response
     {
@@ -23,12 +26,11 @@ class SoundSettingController extends Controller
 
     public function update(Request $request): RedirectResponse
     {
-        $request->validate([
-            'attack' => ['nullable', 'file', 'mimes:mp3,wav,ogg,mpga', 'max:2048'],
-            'hit' => ['nullable', 'file', 'mimes:mp3,wav,ogg,mpga', 'max:2048'],
-            'win' => ['nullable', 'file', 'mimes:mp3,wav,ogg,mpga', 'max:2048'],
-            'lose' => ['nullable', 'file', 'mimes:mp3,wav,ogg,mpga', 'max:2048'],
-        ]);
+        $rules = [];
+        foreach (self::SLOTS as $slot) {
+            $rules[$slot] = ['nullable', 'file', 'mimes:mp3,wav,ogg,mpga', 'max:2048'];
+        }
+        $request->validate($rules);
 
         $setting = SoundSetting::current();
         $data = [];

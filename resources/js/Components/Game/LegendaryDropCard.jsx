@@ -1,26 +1,42 @@
 import { TYPE_COLORS } from '../../data/typeChart';
+import LegendaryBurst from './LegendaryBurst';
 
 export default function LegendaryDropCard({ pokemon, tier, team, onReplace, onSkip }) {
+    const isLegendary = tier.key === 'legendary';
+
     return (
         <div className="max-w-lg mx-auto">
             <div
-                className="rounded-2xl p-1 shadow-xl mb-6"
+                className={`relative rounded-2xl p-1 shadow-xl mb-6 overflow-hidden ${isLegendary ? 'animate-legendary-glow' : ''}`}
                 style={{ background: `linear-gradient(135deg, ${tier.color}, #FEF3C7)` }}
             >
-                <div className="bg-white rounded-2xl p-6 text-center">
-                    <div className="text-sm font-bold mb-1" style={{ color: tier.color }}>
+                {isLegendary && <LegendaryBurst />}
+
+                <div className={`relative bg-white rounded-2xl p-6 text-center overflow-hidden ${isLegendary ? 'animate-legendary-pop' : ''}`}>
+                    {isLegendary && (
+                        <div
+                            className="absolute inset-0 w-1/3 animate-shine-sweep pointer-events-none"
+                            style={{ background: 'linear-gradient(90deg, transparent, rgba(255,255,255,.8), transparent)' }}
+                        />
+                    )}
+
+                    <div className={`relative text-sm font-bold mb-1 ${isLegendary ? 'text-base' : ''}`} style={{ color: tier.color }}>
                         {tier.emoji} {tier.label.toUpperCase()} DITEMUKAN! {tier.emoji}
                     </div>
-                    <img src={pokemon.image} alt={pokemon.name} className="w-32 h-32 object-contain mx-auto" />
-                    <h3 className="font-extrabold text-xl text-slate-800 mt-2">{pokemon.name}</h3>
-                    <div className="flex justify-center gap-1 mt-2">
+                    <img
+                        src={pokemon.image}
+                        alt={pokemon.name}
+                        className={`relative object-contain mx-auto ${isLegendary ? 'w-40 h-40 drop-shadow-lg' : 'w-32 h-32'}`}
+                    />
+                    <h3 className={`relative font-extrabold text-slate-800 mt-2 ${isLegendary ? 'text-2xl' : 'text-xl'}`}>{pokemon.name}</h3>
+                    <div className="relative flex justify-center gap-1 mt-2">
                         {pokemon.types.map((t) => (
                             <span key={t} className="text-xs font-semibold px-2 py-0.5 rounded-full text-white" style={{ backgroundColor: TYPE_COLORS[t] || '#777' }}>
                                 {t}
                             </span>
                         ))}
                     </div>
-                    <p className="text-slate-500 text-sm mt-3">Pilih Pokemon di timmu yang mau digantikan:</p>
+                    <p className="relative text-slate-500 text-sm mt-3">Pilih Pokemon di timmu yang mau digantikan:</p>
                 </div>
             </div>
 

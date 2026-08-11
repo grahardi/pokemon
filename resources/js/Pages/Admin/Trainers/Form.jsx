@@ -1,5 +1,5 @@
 import AdminLayout from '../../../Layouts/AdminLayout';
-import { useForm } from '@inertiajs/react';
+import { useForm, router } from '@inertiajs/react';
 import { useState, useEffect } from 'react';
 
 const ICON_OPTIONS = [
@@ -20,6 +20,7 @@ export default function Form({ trainer }) {
         gradient_to: trainer?.gradient_to || '#3B82F6',
         image: null,
         image_url: trainer?.image_url || '',
+        pick_sound: null,
         order: trainer?.order ?? 0,
         is_active: trainer?.is_active ?? true,
     });
@@ -112,6 +113,38 @@ export default function Form({ trainer }) {
                             disabled={!!data.image}
                             className="w-full rounded-lg border-slate-300 focus:border-red-500 focus:ring-red-500 disabled:bg-slate-50 disabled:text-slate-400"
                         />
+                    </div>
+
+                    <div>
+                        <label className="block text-sm font-medium text-slate-700 mb-1">Suara Saat Dipilih (opsional)</label>
+                        <p className="text-xs text-slate-400 mb-2">
+                            Dimainkan saat pemain memilih trainer ini. Kosongkan untuk pakai suara default global (diatur di{' '}
+                            <a href="/admin/sound" className="text-blue-600 hover:underline">Pengaturan Suara</a>).
+                        </p>
+                        {trainer?.pick_sound_url && !data.pick_sound && (
+                            <div className="flex items-center gap-3 mb-2 bg-slate-50 rounded-lg p-2">
+                                <audio controls src={trainer.pick_sound_url} className="h-8 flex-1" />
+                                <a
+                                    href={`/admin/trainers/${trainer.id}/reset-sound`}
+                                    onClick={(e) => {
+                                        e.preventDefault();
+                                        if (confirm('Hapus suara custom, pakai default global?')) {
+                                            router.post(`/admin/trainers/${trainer.id}/reset-sound`);
+                                        }
+                                    }}
+                                    className="text-xs text-red-500 hover:underline shrink-0"
+                                >
+                                    Reset ke default
+                                </a>
+                            </div>
+                        )}
+                        <input
+                            type="file"
+                            accept="audio/mpeg,audio/mp3,audio/wav,audio/ogg"
+                            onChange={(e) => setData('pick_sound', e.target.files?.[0] || null)}
+                            className="w-full text-sm rounded-lg border border-slate-300 file:mr-3 file:py-2 file:px-3 file:border-0 file:bg-slate-100 file:text-slate-700 file:font-medium hover:file:bg-slate-200"
+                        />
+                        {errors.pick_sound && <p className="text-red-600 text-xs mt-1">{errors.pick_sound}</p>}
                     </div>
 
                     <div>

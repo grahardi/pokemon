@@ -4,6 +4,12 @@ import { useForm, router } from '@inertiajs/react';
 const SLOTS = [
     { key: 'attack', label: 'Suara Serang', desc: 'Dimainkan tiap kali karakter melancarkan skill', field: 'attack_sound_url' },
     { key: 'hit', label: 'Suara Kena Hit', desc: 'Dimainkan saat damage masuk ke target', field: 'hit_sound_url' },
+    { key: 'pick', label: 'Suara Pilih Trainer (default)', desc: 'Dipakai kalau trainer tidak punya suara sendiri', field: 'pick_sound_url' },
+    { key: 'battle_start', label: 'Suara Mulai Battle', desc: 'Dimainkan tiap kali pertarungan baru dimulai', field: 'battle_start_sound_url' },
+    { key: 'pokemon_faint', label: 'Suara Pokemon Sendiri Pingsan', desc: 'Dimainkan saat Pokemon di tim pemain pingsan', field: 'pokemon_faint_sound_url' },
+    { key: 'enemy_faint', label: 'Suara Pokemon Lawan Pingsan', desc: 'Dimainkan saat Pokemon lawan pingsan', field: 'enemy_faint_sound_url' },
+    { key: 'gacha', label: 'Suara Gacha (umum)', desc: 'Dimainkan saat dapat hasil gacha tier biasa', field: 'gacha_sound_url' },
+    { key: 'gacha_legendary', label: 'Suara Gacha Legendaris', desc: 'Suara spesial saat dapat gacha tier Legendaris', field: 'gacha_legendary_sound_url' },
     { key: 'win', label: 'Suara Menang', desc: 'Dimainkan di layar hasil kemenangan', field: 'win_sound_url' },
     { key: 'lose', label: 'Suara Kalah', desc: 'Dimainkan di layar hasil kekalahan', field: 'lose_sound_url' },
 ];
@@ -12,6 +18,12 @@ export default function Edit({ setting }) {
     const { data, setData, post, processing, errors } = useForm({
         attack: null,
         hit: null,
+        pick: null,
+        battle_start: null,
+        pokemon_faint: null,
+        enemy_faint: null,
+        gacha: null,
+        gacha_legendary: null,
         win: null,
         lose: null,
     });
