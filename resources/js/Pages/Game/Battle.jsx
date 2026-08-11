@@ -7,6 +7,8 @@ import TrainerSelect from '../../Components/Game/TrainerSelect';
 import TrainerAvatarTag from '../../Components/Game/TrainerAvatarTag';
 import ModeSelect from '../../Components/Game/ModeSelect';
 import LevelBanner from '../../Components/Game/LevelBanner';
+import LevelTrack from '../../Components/Game/LevelTrack';
+import EvolveSelect from '../../Components/Game/EvolveSelect';
 import VictoryBurst from '../../Components/Game/VictoryBurst';
 import { TYPE_COLORS } from '../../data/typeChart';
 import { CHALLENGE_LEVELS } from '../../data/challengeLevels';
@@ -20,12 +22,13 @@ function randomPick(arr, n) {
 }
 
 export default function Battle({ totalPokemon }) {
-    const [phase, setPhase] = useState('trainer'); // trainer | nickname | mode | select | team-select | battle | result
+    const [phase, setPhase] = useState('trainer');
+    // trainer | nickname | mode | select | team-select | battle | result | challenge-lobby | evolve-select
     const [trainers, setTrainers] = useState([]);
     const [trainer, setTrainer] = useState(null);
     const [rivalTrainer, setRivalTrainer] = useState(null);
     const [nickname, setNickname] = useState('');
-    const [mode, setMode] = useState(null); // battle | challenge
+    const [mode, setMode] = useState(null);
     const [choices, setChoices] = useState([]);
     const [teamSelection, setTeamSelection] = useState([]);
     const [error, setError] = useState('');
@@ -39,8 +42,18 @@ export default function Battle({ totalPokemon }) {
     const [botActiveIndex, setBotActiveIndex] = useState(0);
 
     const [levelIndex, setLevelIndex] = useState(0);
-    const [challengeResult, setChallengeResult] = useState(null); // won | lost | null
-    const [victoryBurst, setVictoryBurst] = useState(null); // {title, subtitle} | null
+    const [clearedLevels, setClearedLevels] = useState([]);
+    const [winCount, setWinCount] = useState(0);
+    const [evolvesUsed, setEvolvesUsed] = useState(0);
+    const [lastOutcome, setLastOutcome] = useState(null); // 'won' | 'lost' | null
+    const [challengeResult, setChallengeResult] = useState(null);
+    const [victoryBurst, setVictoryBurst] = useState(null);
+
+    const [evolutionOptions, setEvolutionOptions] = useState({});
+    const [evolveSelection, setEvolveSelection] = useState(null); // {slotIndex, target}
+
+    const [cooldowns, setCooldowns] = useState({});
+    const cooldownsRef = useRef({});
 
     const [log, setLog] = useState([]);
     const [busy, setBusy] = useState(false);
@@ -53,7 +66,6 @@ export default function Battle({ totalPokemon }) {
     const botTeamRef = useRef([]);
     const botTeamHpRef = useRef([]);
     const botActiveIndexRef = useRef(0);
-    const levelIndexRef = useRef(0);
     const winnerRef = useRef(null);
     const logEndRef = useRef(null);
 
@@ -76,22 +88,18 @@ export default function Battle({ totalPokemon }) {
         return source[Math.floor(Math.random() * source.length)];
     };
 
+    const evolveTokens = Math.floor(winCount / 2) - evolvesUsed;
+
     // ---------- Navigasi awal ----------
 
     const confirmTrainer = () => {
-        if (!trainer) {
-            setError('Pilih trainer dulu ya!');
-            return;
-        }
+        if (!trainer) { setError('Pilih trainer dulu ya!'); return; }
         setError('');
         setPhase('nickname');
     };
 
     const confirmNickname = () => {
-        if (!nickname.trim()) {
-            setError('Isi nickname dulu ya!');
-            return;
-        }
+        if (!nickname.trim()) { setError('Isi nickname dulu ya!'); return; }
         setError('');
         setPhase('mode');
     };
@@ -116,7 +124,7 @@ export default function Battle({ totalPokemon }) {
         }
     };
 
-    // ---------- Mode Battle (1 lawan 1, tanpa trainer lawan) ----------
+    // ---------- Mode Battle ----------
 
     const pickPokemon = async (picked) => {
         setPhase('loading');
@@ -124,7 +132,6 @@ export default function Battle({ totalPokemon }) {
             const res = await fetch(`/api/tarung/random?count=1&exclude=${picked.id}`);
             const data = await res.json();
             const botPokemon = data[0];
-
             const pHp = battleMaxHp(picked);
             const bHp = battleMaxHp(botPokemon);
 
@@ -145,6 +152,8 @@ export default function Battle({ totalPokemon }) {
             setLog([`Pertarungan dimulai! ${nickname} mengirim ${picked.name}, lawan mengirim ${botPokemon.name}!`]);
             setWinner(null);
             winnerRef.current = null;
+            cooldownsRef.current = {};
+            setCooldowns({});
             setPhase('battle');
         } catch (e) {
             setError('Gagal memuat lawan. Coba lagi.');
@@ -152,7 +161,7 @@ export default function Battle({ totalPokemon }) {
         }
     };
 
-    // ---------- Mode Challenge (3v3 vs trainer, gauntlet sampai boss) ----------
+    // ---------- Mode Challenge ----------
 
     const toggleTeamMember = (pokemon) => {
         setTeamSelection((prev) => {
@@ -178,22 +187,31 @@ export default function Battle({ totalPokemon }) {
 
     const startChallenge = async () => {
         if (teamSelection.length !== 3) return;
+        const initialHp = teamSelection.map((p) => battleMaxHp(p));
+        setTeam(teamSelection);
+        teamHpRef.current = initialHp;
+        setTeamHp(initialHp);
+        activeIndexRef.current = 0;
+        setActiveIndex(0);
+        setLevelIndex(0);
+        setClearedLevels([]);
+        setWinCount(0);
+        setEvolvesUsed(0);
+        setChallengeResult(null);
+        setLastOutcome(null);
+        cooldownsRef.current = {};
+        setCooldowns({});
+        setPhase('challenge-lobby');
+    };
+
+    const startLevelFight = async (idx) => {
         setPhase('loading');
         try {
-            const initialHp = teamSelection.map((p) => battleMaxHp(p));
-            setTeam(teamSelection);
-            teamHpRef.current = initialHp;
-            setTeamHp(initialHp);
-            activeIndexRef.current = 0;
-            setActiveIndex(0);
-            levelIndexRef.current = 0;
-            setLevelIndex(0);
-            setChallengeResult(null);
-
-            const botTeam0 = await fetchBotTeamForLevel(0);
-            const bHps = botTeam0.map((p) => battleMaxHp(p));
-            botTeamRef.current = botTeam0;
-            setBotTeam(botTeam0);
+            setLevelIndex(idx);
+            const botTeamN = await fetchBotTeamForLevel(idx);
+            const bHps = botTeamN.map((p) => battleMaxHp(p));
+            botTeamRef.current = botTeamN;
+            setBotTeam(botTeamN);
             botTeamHpRef.current = bHps;
             setBotTeamHp(bHps);
             botActiveIndexRef.current = 0;
@@ -202,63 +220,92 @@ export default function Battle({ totalPokemon }) {
             const rival = pickRivalTrainer(trainer?.id);
             setRivalTrainer(rival);
 
+            activeIndexRef.current = 0;
+            setActiveIndex(0);
+            cooldownsRef.current = {};
+            setCooldowns({});
+
             setLog([
-                `${CHALLENGE_LEVELS[0].label}${rival ? ` — ${rival.name}` : ''} muncul!`,
-                `${nickname} mengirim ${teamSelection[0].name}, lawan mengirim ${botTeam0[0].name}!`,
+                `${CHALLENGE_LEVELS[idx].label}${rival ? ` — ${rival.name}` : ''} muncul!`,
+                `${nickname} mengirim ${team[0].name}, lawan mengirim ${botTeamN[0].name}!`,
             ]);
             setWinner(null);
             winnerRef.current = null;
             setPhase('battle');
         } catch (e) {
-            setError('Gagal memulai challenge. Coba lagi.');
-            setPhase('team-select');
+            setError('Gagal memuat lawan. Coba lagi.');
+            setPhase('challenge-lobby');
         }
     };
 
-    // ---------- Engine pertarungan ----------
-
-    const advanceStageOrFinish = async () => {
-        const nextIdx = levelIndexRef.current + 1;
-
-        if (nextIdx >= CHALLENGE_LEVELS.length) {
-            setVictoryBurst({ title: 'Juara Liga! 🏆', subtitle: `${nickname} menembus seluruh gauntlet!` });
-            await sleep(1600);
-            setVictoryBurst(null);
-            setChallengeResult('won');
-            winnerRef.current = 'player';
-            setWinner('player');
-            return;
-        }
-
+    const returnToLobbyAfterWin = async () => {
         setVictoryBurst({ title: `${rivalTrainer?.name || 'Trainer'} Terkalahkan!`, subtitle: 'Timmu dipulihkan sepenuhnya' });
         await sleep(1500);
         setVictoryBurst(null);
 
-        // Heal penuh tim pemain begitu ganti trainer
+        setClearedLevels((prev) => (prev.includes(levelIndex) ? prev : [...prev, levelIndex]));
+        setWinCount((prev) => prev + 1);
+
         const healedHp = team.map((p) => battleMaxHp(p));
         teamHpRef.current = healedHp;
         setTeamHp(healedHp);
         activeIndexRef.current = 0;
         setActiveIndex(0);
 
-        levelIndexRef.current = nextIdx;
-        setLevelIndex(nextIdx);
-
-        const newBotTeam = await fetchBotTeamForLevel(nextIdx);
-        const newBotHps = newBotTeam.map((p) => battleMaxHp(p));
-        botTeamRef.current = newBotTeam;
-        setBotTeam(newBotTeam);
-        botTeamHpRef.current = newBotHps;
-        setBotTeamHp(newBotHps);
-        botActiveIndexRef.current = 0;
-        setBotActiveIndex(0);
-
-        const newRival = pickRivalTrainer(trainer?.id);
-        setRivalTrainer(newRival);
-
-        addLog(`${CHALLENGE_LEVELS[nextIdx].label}${newRival ? ` — ${newRival.name}` : ''} muncul!`);
-        addLog(`Lawan mengirim ${newBotTeam[0].name}!`);
+        setLastOutcome('won');
+        setPhase('challenge-lobby');
     };
+
+    const returnToLobbyAfterLoss = async () => {
+        await sleep(800);
+        const healedHp = team.map((p) => battleMaxHp(p));
+        teamHpRef.current = healedHp;
+        setTeamHp(healedHp);
+        activeIndexRef.current = 0;
+        setActiveIndex(0);
+
+        setLastOutcome('lost');
+        setPhase('challenge-lobby');
+    };
+
+    // ---------- Evolusi ----------
+
+    const openEvolveSelect = async () => {
+        setPhase('loading');
+        try {
+            const dexList = team.map((p) => p.dex_number).join(',');
+            const res = await fetch(`/api/tarung/evolutions?dex=${dexList}`);
+            setEvolutionOptions(await res.json());
+            setEvolveSelection(null);
+            setPhase('evolve-select');
+        } catch (e) {
+            setError('Gagal memuat data evolusi.');
+            setPhase('challenge-lobby');
+        }
+    };
+
+    const confirmEvolve = () => {
+        if (!evolveSelection) return;
+
+        const newTeam = [...team];
+        newTeam[evolveSelection.slotIndex] = evolveSelection.target;
+        setTeam(newTeam);
+
+        const healedHp = newTeam.map((p) => battleMaxHp(p));
+        teamHpRef.current = healedHp;
+        setTeamHp(healedHp);
+        activeIndexRef.current = 0;
+        setActiveIndex(0);
+
+        setEvolvesUsed((prev) => prev + 1);
+        setLevelIndex(0);
+        setClearedLevels([]);
+        setLastOutcome(null);
+        setEvolveSelection(null);
+        setPhase('challenge-lobby');
+    };
+
+    // ---------- Engine pertarungan ----------
 
     const handleBotActiveFainted = async () => {
         if (mode === 'battle') {
@@ -269,7 +316,8 @@ export default function Battle({ totalPokemon }) {
 
         const aliveIdx = botTeamHpRef.current.findIndex((hp) => hp > 0);
         if (aliveIdx === -1) {
-            await advanceStageOrFinish();
+            winnerRef.current = 'player';
+            setWinner('player');
             return;
         }
 
@@ -287,7 +335,6 @@ export default function Battle({ totalPokemon }) {
 
         const aliveIdx = teamHpRef.current.findIndex((hp) => hp > 0);
         if (aliveIdx === -1) {
-            setChallengeResult('lost');
             winnerRef.current = 'bot';
             setWinner('bot');
             return;
@@ -350,11 +397,26 @@ export default function Battle({ totalPokemon }) {
         return false;
     };
 
+    const applyCooldown = (pokemonId, moveName) => {
+        const current = { ...(cooldownsRef.current[pokemonId] || {}) };
+        Object.keys(current).forEach((k) => {
+            current[k] = Math.max(0, current[k] - 1);
+        });
+        current[moveName] = 1;
+        cooldownsRef.current = { ...cooldownsRef.current, [pokemonId]: current };
+        setCooldowns(cooldownsRef.current);
+    };
+
     const handleMove = async (move) => {
         if (busy || winnerRef.current) return;
-        setBusy(true);
 
         const activePlayerNow = team[activeIndexRef.current];
+        const moveCooldown = cooldownsRef.current[activePlayerNow.id]?.[move.name] || 0;
+        if (moveCooldown > 0) return;
+
+        setBusy(true);
+        applyCooldown(activePlayerNow.id, move.name);
+
         const activeBotNow = botTeamRef.current[botActiveIndexRef.current];
         const order = activePlayerNow.speed >= activeBotNow.speed ? ['player', 'bot'] : ['bot', 'player'];
 
@@ -371,7 +433,20 @@ export default function Battle({ totalPokemon }) {
         }
 
         setBusy(false);
-        if (winnerRef.current) setPhase('result');
+
+        if (winnerRef.current === 'player') {
+            if (mode === 'challenge') {
+                await returnToLobbyAfterWin();
+            } else {
+                setPhase('result');
+            }
+        } else if (winnerRef.current === 'bot') {
+            if (mode === 'challenge') {
+                await returnToLobbyAfterLoss();
+            } else {
+                setPhase('result');
+            }
+        }
     };
 
     const playAgain = () => {
@@ -418,10 +493,7 @@ export default function Battle({ totalPokemon }) {
                         <p className="text-slate-500 text-center text-sm mb-6">Pilih avatar trainer-mu:</p>
                         <TrainerSelect trainers={trainers} selected={trainer} onSelect={setTrainer} />
                         {error && <p className="text-red-500 text-sm text-center mt-3">{error}</p>}
-                        <button
-                            onClick={confirmTrainer}
-                            className="w-full bg-red-500 hover:bg-red-600 text-white font-bold py-3 rounded-xl mt-6 shadow-lg transition"
-                        >
+                        <button onClick={confirmTrainer} className="w-full bg-red-500 hover:bg-red-600 text-white font-bold py-3 rounded-xl mt-6 shadow-lg transition">
                             Lanjut
                         </button>
                     </div>
@@ -452,10 +524,7 @@ export default function Battle({ totalPokemon }) {
                             className="w-full rounded-lg px-4 py-3 mb-3 text-center font-semibold bg-white text-slate-800 border-2 border-slate-300 focus:border-red-400 focus:outline-none placeholder:text-slate-400"
                         />
                         {error && <p className="text-red-500 text-sm mb-3">{error}</p>}
-                        <button
-                            onClick={confirmNickname}
-                            className="w-full bg-amber-400 hover:bg-amber-300 text-slate-900 font-bold py-3 rounded-lg transition"
-                        >
+                        <button onClick={confirmNickname} className="w-full bg-amber-400 hover:bg-amber-300 text-slate-900 font-bold py-3 rounded-lg transition">
                             Masuk Lobi
                         </button>
                     </div>
@@ -508,8 +577,69 @@ export default function Battle({ totalPokemon }) {
                             disabled={teamSelection.length !== 3}
                             className="w-full bg-red-500 hover:bg-red-600 disabled:bg-slate-300 disabled:cursor-not-allowed text-white font-bold py-3 rounded-xl shadow-lg transition"
                         >
-                            {teamSelection.length === 3 ? 'Mulai Challenge!' : `Pilih ${3 - teamSelection.length} Pokemon lagi`}
+                            {teamSelection.length === 3 ? 'Masuk Lobi Challenge' : `Pilih ${3 - teamSelection.length} Pokemon lagi`}
                         </button>
+                    </div>
+                )}
+
+                {phase === 'challenge-lobby' && (
+                    <div>
+                        <h2 className="text-xl font-bold text-center mb-1">Lobi Challenge</h2>
+                        {lastOutcome === 'won' && <p className="text-green-600 text-center text-sm mb-1">🎉 Kamu menang! Timmu sudah dipulihkan.</p>}
+                        {lastOutcome === 'lost' && <p className="text-red-500 text-center text-sm mb-1">💀 Timmu kalah, tapi sudah dipulihkan untuk coba lagi.</p>}
+                        <p className="text-slate-500 text-center text-sm mb-4">Total kemenangan: <span className="font-bold text-slate-700">{winCount}</span></p>
+
+                        {evolveTokens > 0 && (
+                            <button
+                                onClick={openEvolveSelect}
+                                className="w-full bg-gradient-to-r from-purple-500 to-pink-500 text-white font-bold py-3 rounded-xl mb-4 shadow-lg animate-pulse"
+                            >
+                                ✨ Evolusi Tersedia ({evolveTokens})! Klik untuk pilih Pokemon
+                            </button>
+                        )}
+
+                        <div className="flex gap-2 mb-4 justify-center">
+                            {team.map((p) => (
+                                <div key={p.id} className="bg-white rounded-lg shadow px-2 py-1 flex items-center gap-1.5 text-xs">
+                                    <img src={p.image} alt={p.name} className="w-6 h-6 object-contain" />
+                                    {p.name}
+                                </div>
+                            ))}
+                        </div>
+
+                        <LevelTrack levels={CHALLENGE_LEVELS} clearedLevels={clearedLevels} onSelectLevel={startLevelFight} />
+
+                        <button onClick={backToStart} className="w-full mt-4 bg-slate-100 hover:bg-slate-200 text-slate-600 font-semibold py-2.5 rounded-lg text-sm">
+                            Keluar dari Challenge
+                        </button>
+                    </div>
+                )}
+
+                {phase === 'evolve-select' && (
+                    <div>
+                        <h2 className="text-xl font-bold text-center mb-1">Pilih Pokemon untuk Evolusi</h2>
+                        <p className="text-slate-500 text-center text-sm mb-6">Progres level akan reset ke awal, tapi timmu jadi lebih kuat.</p>
+                        <EvolveSelect
+                            team={team}
+                            evolutions={evolutionOptions}
+                            selected={evolveSelection}
+                            onSelectTarget={(slotIndex, target) => setEvolveSelection({ slotIndex, target })}
+                        />
+                        <div className="flex gap-3 justify-center mt-6">
+                            <button
+                                onClick={confirmEvolve}
+                                disabled={!evolveSelection}
+                                className="bg-purple-500 hover:bg-purple-600 disabled:bg-slate-300 disabled:cursor-not-allowed text-white font-bold px-6 py-3 rounded-lg"
+                            >
+                                Konfirmasi Evolusi
+                            </button>
+                            <button
+                                onClick={() => { setEvolveSelection(null); setPhase('challenge-lobby'); }}
+                                className="bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold px-6 py-3 rounded-lg"
+                            >
+                                Batal
+                            </button>
+                        </div>
                     </div>
                 )}
 
@@ -527,39 +657,29 @@ export default function Battle({ totalPokemon }) {
                                     </div>
                                 )}
                                 <div className="bg-white/90 rounded-lg px-3 py-1.5 text-slate-800 shadow mb-2 w-40">
-                                    <div className="flex justify-between items-center text-xs font-bold mb-1">
-                                        <span>{activeBot.name}</span>
-                                    </div>
+                                    <div className="flex justify-between items-center text-xs font-bold mb-1"><span>{activeBot.name}</span></div>
                                     <HpBar current={activeBotHp} max={battleMaxHp(activeBot)} />
                                 </div>
                             </div>
                             <img
                                 src={activeBot.image}
                                 alt={activeBot.name}
-                                className={`absolute top-8 right-16 w-28 h-28 object-contain drop-shadow-xl ${
-                                    attacking === 'bot' ? 'animate-lunge-left' : ''
-                                } ${hit === 'bot' ? 'animate-hit' : ''} ${winner === 'player' && phase === 'result' ? 'animate-faint' : ''}`}
+                                className={`absolute top-8 right-16 w-28 h-28 object-contain drop-shadow-xl ${attacking === 'bot' ? 'animate-lunge-left' : ''} ${hit === 'bot' ? 'animate-hit' : ''} ${winner === 'player' && phase === 'result' ? 'animate-faint' : ''}`}
                             />
 
                             <div className="absolute bottom-4 left-6">
                                 {trainer && mode === 'challenge' && (
-                                    <div className="mb-1.5">
-                                        <TrainerAvatarTag trainer={trainer} align="left" />
-                                    </div>
+                                    <div className="mb-1.5"><TrainerAvatarTag trainer={trainer} align="left" /></div>
                                 )}
                                 <div className="bg-white/90 rounded-lg px-3 py-1.5 text-slate-800 shadow mb-2 w-40">
-                                    <div className="flex justify-between items-center text-xs font-bold mb-1">
-                                        <span>{activePlayer.name}</span>
-                                    </div>
+                                    <div className="flex justify-between items-center text-xs font-bold mb-1"><span>{activePlayer.name}</span></div>
                                     <HpBar current={activePlayerHp} max={battleMaxHp(activePlayer)} />
                                 </div>
                             </div>
                             <img
                                 src={activePlayer.image}
                                 alt={activePlayer.name}
-                                className={`absolute bottom-8 left-16 w-32 h-32 object-contain drop-shadow-xl ${
-                                    attacking === 'player' ? 'animate-lunge-right' : ''
-                                } ${hit === 'player' ? 'animate-hit' : ''} ${winner === 'bot' && phase === 'result' ? 'animate-faint' : ''}`}
+                                className={`absolute bottom-8 left-16 w-32 h-32 object-contain drop-shadow-xl ${attacking === 'player' ? 'animate-lunge-right' : ''} ${hit === 'player' ? 'animate-hit' : ''} ${winner === 'bot' && phase === 'result' ? 'animate-faint' : ''}`}
                             />
                         </div>
 
@@ -567,35 +687,15 @@ export default function Battle({ totalPokemon }) {
                             <div className="flex items-center justify-between gap-2 mb-3 flex-wrap">
                                 <div className="flex gap-1.5 flex-wrap">
                                     {team.map((p, i) => (
-                                        <div
-                                            key={p.id}
-                                            className={`flex items-center gap-1.5 px-2 py-1 rounded-full text-xs font-semibold ${
-                                                teamHp[i] <= 0
-                                                    ? 'bg-slate-200 text-slate-400 line-through'
-                                                    : i === activeIndex
-                                                    ? 'bg-amber-400 text-slate-900'
-                                                    : 'bg-white text-slate-600 shadow'
-                                            }`}
-                                        >
-                                            <img src={p.image} alt={p.name} className="w-5 h-5 object-contain" />
-                                            {p.name}
+                                        <div key={p.id} className={`flex items-center gap-1.5 px-2 py-1 rounded-full text-xs font-semibold ${teamHp[i] <= 0 ? 'bg-slate-200 text-slate-400 line-through' : i === activeIndex ? 'bg-amber-400 text-slate-900' : 'bg-white text-slate-600 shadow'}`}>
+                                            <img src={p.image} alt={p.name} className="w-5 h-5 object-contain" />{p.name}
                                         </div>
                                     ))}
                                 </div>
                                 <div className="flex gap-1.5 flex-wrap">
                                     {botTeam.map((p, i) => (
-                                        <div
-                                            key={p.id}
-                                            className={`flex items-center gap-1.5 px-2 py-1 rounded-full text-xs font-semibold ${
-                                                botTeamHp[i] <= 0
-                                                    ? 'bg-slate-200 text-slate-400 line-through'
-                                                    : i === botActiveIndex
-                                                    ? 'bg-red-400 text-white'
-                                                    : 'bg-white text-slate-600 shadow'
-                                            }`}
-                                        >
-                                            {p.name}
-                                            <img src={p.image} alt={p.name} className="w-5 h-5 object-contain" />
+                                        <div key={p.id} className={`flex items-center gap-1.5 px-2 py-1 rounded-full text-xs font-semibold ${botTeamHp[i] <= 0 ? 'bg-slate-200 text-slate-400 line-through' : i === botActiveIndex ? 'bg-red-400 text-white' : 'bg-white text-slate-600 shadow'}`}>
+                                            {p.name}<img src={p.image} alt={p.name} className="w-5 h-5 object-contain" />
                                         </div>
                                     ))}
                                 </div>
@@ -603,75 +703,48 @@ export default function Battle({ totalPokemon }) {
                         )}
 
                         <div className="bg-slate-800 rounded-xl p-3 h-24 overflow-y-auto text-sm mb-4 font-mono">
-                            {log.map((line, i) => (
-                                <div key={i} className="text-slate-100 mb-0.5">{line}</div>
-                            ))}
+                            {log.map((line, i) => <div key={i} className="text-slate-100 mb-0.5">{line}</div>)}
                             <div ref={logEndRef} />
                         </div>
 
                         {phase === 'result' ? (
                             <div className="text-center bg-white rounded-2xl shadow-lg p-6">
-                                {mode === 'battle' ? (
-                                    <>
-                                        <h2 className="text-2xl font-extrabold mb-2">
-                                            {winner === 'player' ? '🎉 Kamu Menang!' : '💀 Kamu Kalah!'}
-                                        </h2>
-                                        <p className="text-slate-500 mb-4">
-                                            {winner === 'player'
-                                                ? `${activePlayer.name} berhasil mengalahkan ${activeBot.name}!`
-                                                : `${activeBot.name} milik lawan terlalu kuat. Coba lagi!`}
-                                        </p>
-                                    </>
-                                ) : (
-                                    <>
-                                        <h2 className="text-2xl font-extrabold mb-2">
-                                            {challengeResult === 'won' ? '🏆 Juara Liga!' : '💀 Challenge Gagal'}
-                                        </h2>
-                                        <p className="text-slate-500 mb-4">
-                                            {challengeResult === 'won'
-                                                ? `${nickname} berhasil menembus seluruh gauntlet trainer!`
-                                                : `Timmu gugur di ${currentLevel?.label}${rivalTrainer ? ` melawan ${rivalTrainer.name}` : ''}. Terus berlatih, ${nickname}!`}
-                                        </p>
-                                    </>
-                                )}
+                                <h2 className="text-2xl font-extrabold mb-2">{winner === 'player' ? '🎉 Kamu Menang!' : '💀 Kamu Kalah!'}</h2>
+                                <p className="text-slate-500 mb-4">
+                                    {winner === 'player' ? `${activePlayer.name} berhasil mengalahkan ${activeBot.name}!` : `${activeBot.name} milik lawan terlalu kuat. Coba lagi!`}
+                                </p>
                                 <div className="flex gap-3 justify-center">
-                                    <button
-                                        onClick={playAgain}
-                                        className="bg-amber-400 hover:bg-amber-300 text-slate-900 font-bold px-6 py-3 rounded-lg"
-                                    >
-                                        Main Lagi
-                                    </button>
-                                    <button
-                                        onClick={backToStart}
-                                        className="bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold px-6 py-3 rounded-lg"
-                                    >
-                                        Ganti Trainer
-                                    </button>
+                                    <button onClick={playAgain} className="bg-amber-400 hover:bg-amber-300 text-slate-900 font-bold px-6 py-3 rounded-lg">Main Lagi</button>
+                                    <button onClick={backToStart} className="bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold px-6 py-3 rounded-lg">Ganti Trainer</button>
                                 </div>
                             </div>
                         ) : (
                             <div className="grid grid-cols-2 gap-3">
-                                {activePlayer.moves.map((move) => (
-                                    <button
-                                        key={move.name}
-                                        disabled={busy}
-                                        onClick={() => handleMove(move)}
-                                        className="bg-white hover:bg-slate-50 disabled:opacity-50 disabled:cursor-not-allowed text-slate-800 rounded-lg px-4 py-3 text-left shadow transition"
-                                    >
-                                        <div className="flex justify-between items-center">
-                                            <span className="font-bold text-sm">{move.name}</span>
-                                            <span
-                                                className="text-xs font-semibold px-2 py-0.5 rounded-full text-white"
-                                                style={{ backgroundColor: TYPE_COLORS[move.type] || '#777' }}
-                                            >
-                                                {move.type}
-                                            </span>
-                                        </div>
-                                        <div className="text-xs text-slate-500 mt-1">
-                                            Power {move.power ?? '-'} &middot; Akurasi {move.accuracy ?? '-'}%
-                                        </div>
-                                    </button>
-                                ))}
+                                {activePlayer.moves.map((move) => {
+                                    const cd = cooldowns[activePlayer.id]?.[move.name] || 0;
+                                    const disabled = busy || cd > 0;
+                                    return (
+                                        <button
+                                            key={move.name}
+                                            disabled={disabled}
+                                            onClick={() => handleMove(move)}
+                                            className="bg-white hover:bg-slate-50 disabled:opacity-50 disabled:cursor-not-allowed text-slate-800 rounded-lg px-4 py-3 text-left shadow transition relative"
+                                        >
+                                            <div className="flex justify-between items-center">
+                                                <span className="font-bold text-sm">{move.name}</span>
+                                                <span className="text-xs font-semibold px-2 py-0.5 rounded-full text-white" style={{ backgroundColor: TYPE_COLORS[move.type] || '#777' }}>
+                                                    {move.type}
+                                                </span>
+                                            </div>
+                                            <div className="text-xs text-slate-500 mt-1">
+                                                Power {move.power ?? '-'} &middot; Akurasi {move.accuracy ?? '-'}%
+                                            </div>
+                                            {cd > 0 && (
+                                                <span className="absolute top-1 left-1 bg-slate-700 text-white text-[10px] px-1.5 py-0.5 rounded-full">Cooldown</span>
+                                            )}
+                                        </button>
+                                    );
+                                })}
                             </div>
                         )}
                     </div>

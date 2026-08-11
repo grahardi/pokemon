@@ -34,6 +34,7 @@ Route::prefix('game')->name('games.')->group(function () {
 Route::get('/tarung', [BattleGameController::class, 'index'])->name('battle.index');
 Route::get('/api/tarung/random', [BattleGameController::class, 'randomPokemon'])->name('battle.random');
 Route::get('/api/tarung/find', [BattleGameController::class, 'findByName'])->name('battle.find');
+Route::get('/api/tarung/evolutions', [BattleGameController::class, 'evolutions'])->name('battle.evolutions');
 Route::get('/api/tarung/trainers', [BattleGameController::class, 'trainers'])->name('battle.trainers');
 
 // --- Autentikasi Admin ---

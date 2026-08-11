@@ -78,6 +78,33 @@ class BattleGameController extends Controller
         );
     }
 
+    /**
+     * Cek kemungkinan evolusi selanjutnya untuk beberapa Pokemon sekaligus (batch),
+     * dipakai fitur Evolusi di mode Challenge. Return map dex_number => array opsi evolusi.
+     */
+    public function evolutions(Request $request)
+    {
+        $dexNumbers = array_filter(array_map('intval', explode(',', $request->get('dex', ''))));
+        $result = [];
+
+        foreach ($dexNumbers as $dex) {
+            $current = Pokemon::where('dex_number', $dex)->first();
+
+            if (! $current || ! $current->evolution_chain_id) {
+                $result[$dex] = [];
+                continue;
+            }
+
+            $nextForms = Pokemon::where('evolution_chain_id', $current->evolution_chain_id)
+                ->where('evolves_from', $dex)
+                ->get();
+
+            $result[$dex] = $nextForms->map(fn (Pokemon $p) => $this->formatForBattle($p))->values();
+        }
+
+        return response()->json($result);
+    }
+
     private function formatForBattle(Pokemon $pokemon): array
     {
         $moves = collect($pokemon->moves_level ?? [])
