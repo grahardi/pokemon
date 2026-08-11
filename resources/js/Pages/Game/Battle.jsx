@@ -10,8 +10,10 @@ import LevelBanner from '../../Components/Game/LevelBanner';
 import LevelTrack from '../../Components/Game/LevelTrack';
 import EvolveSelect from '../../Components/Game/EvolveSelect';
 import VictoryBurst from '../../Components/Game/VictoryBurst';
+import LegendaryDropCard from '../../Components/Game/LegendaryDropCard';
 import { TYPE_COLORS } from '../../data/typeChart';
 import { CHALLENGE_LEVELS } from '../../data/challengeLevels';
+import { LEGENDARY_DROP_POOL, DROP_CHANCE, DROP_EVERY_N_WINS } from '../../data/legendaryDrops';
 import { battleMaxHp, calculateDamage, pickBotMove, effectivenessLabel } from '../../lib/battleEngine';
 
 const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
@@ -51,6 +53,9 @@ export default function Battle({ totalPokemon }) {
 
     const [evolutionOptions, setEvolutionOptions] = useState({});
     const [evolveSelection, setEvolveSelection] = useState(null); // {slotIndex, target}
+
+    const [droppedPokemon, setDroppedPokemon] = useState(null);
+    const winCountRef = useRef(0);
 
     const [cooldowns, setCooldowns] = useState({});
     const cooldownsRef = useRef({});
@@ -195,6 +200,7 @@ export default function Battle({ totalPokemon }) {
         setActiveIndex(0);
         setLevelIndex(0);
         setClearedLevels([]);
+        winCountRef.current = 0;
         setWinCount(0);
         setEvolvesUsed(0);
         setChallengeResult(null);
@@ -244,7 +250,8 @@ export default function Battle({ totalPokemon }) {
         setVictoryBurst(null);
 
         setClearedLevels((prev) => (prev.includes(levelIndex) ? prev : [...prev, levelIndex]));
-        setWinCount((prev) => prev + 1);
+        winCountRef.current += 1;
+        setWinCount(winCountRef.current);
 
         const healedHp = team.map((p) => battleMaxHp(p));
         teamHpRef.current = healedHp;
@@ -253,6 +260,22 @@ export default function Battle({ totalPokemon }) {
         setActiveIndex(0);
 
         setLastOutcome('won');
+
+        if (winCountRef.current % DROP_EVERY_N_WINS === 0 && Math.random() < DROP_CHANCE) {
+            try {
+                const name = LEGENDARY_DROP_POOL[Math.floor(Math.random() * LEGENDARY_DROP_POOL.length)];
+                const res = await fetch(`/api/tarung/find?names=${encodeURIComponent(name)}`);
+                const data = await res.json();
+                if (data[0]) {
+                    setDroppedPokemon(data[0]);
+                    setPhase('legendary-drop');
+                    return;
+                }
+            } catch (e) {
+                // Kalau gagal fetch drop, lanjut ke lobi seperti biasa
+            }
+        }
+
         setPhase('challenge-lobby');
     };
 
@@ -302,6 +325,30 @@ export default function Battle({ totalPokemon }) {
         setClearedLevels([]);
         setLastOutcome(null);
         setEvolveSelection(null);
+        setPhase('challenge-lobby');
+    };
+
+    // ---------- Drop Legendaris ----------
+
+    const replaceWithDrop = (slotIndex) => {
+        if (!droppedPokemon) return;
+
+        const newTeam = [...team];
+        newTeam[slotIndex] = droppedPokemon;
+        setTeam(newTeam);
+
+        const healedHp = newTeam.map((p) => battleMaxHp(p));
+        teamHpRef.current = healedHp;
+        setTeamHp(healedHp);
+        activeIndexRef.current = 0;
+        setActiveIndex(0);
+
+        setDroppedPokemon(null);
+        setPhase('challenge-lobby');
+    };
+
+    const skipDrop = () => {
+        setDroppedPokemon(null);
         setPhase('challenge-lobby');
     };
 
@@ -641,6 +688,15 @@ export default function Battle({ totalPokemon }) {
                             </button>
                         </div>
                     </div>
+                )}
+
+                {phase === 'legendary-drop' && droppedPokemon && (
+                    <LegendaryDropCard
+                        pokemon={droppedPokemon}
+                        team={team}
+                        onReplace={replaceWithDrop}
+                        onSkip={skipDrop}
+                    />
                 )}
 
                 {(phase === 'battle' || phase === 'result') && activePlayer && activeBot && (
