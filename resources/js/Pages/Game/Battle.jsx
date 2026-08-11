@@ -281,12 +281,31 @@ export default function Battle({ totalPokemon }) {
 
     // ---------- Gacha (merger dari sistem drop + evolusi) ----------
 
+    // Beberapa Pokemon "mitos" (Shaymin, Celebi, Jirachi, dkk) punya BST asli lebih rendah
+    // dibanding legendaris trio/box art (Mewtwo, Dialga, dkk). Biar tiap hasil gacha
+    // Legendaris tetap terasa "berasa kuat", stat-nya dinaikkan proporsional kalau
+    // totalnya di bawah ambang batas ini. Ini cuma buff di battle, bukan ubah data katalog.
+    const LEGENDARY_MIN_BST = 650;
+
+    const applyLegendaryBoost = (p) => {
+        const statKeys = ['hp', 'attack', 'defense', 'sp_attack', 'sp_defense', 'speed'];
+        const total = statKeys.reduce((sum, k) => sum + p[k], 0);
+        if (total >= LEGENDARY_MIN_BST) return p;
+
+        const scale = LEGENDARY_MIN_BST / total;
+        const boosted = { ...p };
+        statKeys.forEach((k) => {
+            boosted[k] = Math.round(p[k] * scale);
+        });
+        return boosted;
+    };
+
     const fetchTierPokemon = async (tierKey) => {
         if (tierKey === 'legendary') {
             const name = LEGENDARY_DROP_POOL[Math.floor(Math.random() * LEGENDARY_DROP_POOL.length)];
             const res = await fetch(`/api/tarung/find?names=${encodeURIComponent(name)}`);
             const data = await res.json();
-            return data[0] || null;
+            return data[0] ? applyLegendaryBoost(data[0]) : null;
         }
         if (tierKey === 'secondEvo') {
             const res = await fetch('/api/tarung/random?count=1&has_evolved=1');
