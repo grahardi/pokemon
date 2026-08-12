@@ -10,6 +10,7 @@ import LevelBanner from '../../Components/Game/LevelBanner';
 import LevelTrack from '../../Components/Game/LevelTrack';
 import EvolveSelect from '../../Components/Game/EvolveSelect';
 import LegendaryDropCard from '../../Components/Game/LegendaryDropCard';
+import StatBoostCard from '../../Components/Game/StatBoostCard';
 import TrainerDuelResult from '../../Components/Game/TrainerDuelResult';
 import Confetti from '../../Components/Game/Confetti';
 import PetalFall from '../../Components/Game/PetalFall';
@@ -57,6 +58,7 @@ export default function Battle({ totalPokemon }) {
 
     const [droppedPokemon, setDroppedPokemon] = useState(null);
     const [dropTier, setDropTier] = useState(null);
+    const [statBoostInfo, setStatBoostInfo] = useState(null); // {pokemon, changes} | null
 
     const [resultRevealed, setResultRevealed] = useState(false);
     const [celebration, setCelebration] = useState(null);
@@ -409,28 +411,90 @@ export default function Battle({ totalPokemon }) {
 
     // ---------- Layar hasil per-stage (2 avatar) ----------
 
+    // ---------- Stat Boost (kemenangan non-gacha) ----------
+    // Rumus: pilih 1 Pokemon di tim secara acak berbobot (yang total stat-nya
+    // lebih rendah punya peluang lebih besar kepilih, biar tim jadi lebih rata/balance),
+    // lalu naikkan 2 stat acak masing-masing +3 sampai +7.
+
+    const statTotal = (p) => p.hp + p.attack + p.defense + p.sp_attack + p.sp_defense + p.speed;
+
+    const pickWeightedWeakest = (members) => {
+        const totals = members.map(statTotal);
+        const maxTotal = Math.max(...totals);
+        const weights = totals.map((t) => (maxTotal - t) + 15); // +15 base weight biar semua tetap punya kans
+        const sumWeights = weights.reduce((a, b) => a + b, 0);
+        let r = Math.random() * sumWeights;
+        for (let i = 0; i < weights.length; i++) {
+            r -= weights[i];
+            if (r <= 0) return i;
+        }
+        return weights.length - 1;
+    };
+
+    const applyRandomStatBoost = (pokemon) => {
+        const statKeys = ['hp', 'attack', 'defense', 'sp_attack', 'sp_defense', 'speed'];
+        const shuffled = [...statKeys].sort(() => Math.random() - 0.5);
+        const chosen = shuffled.slice(0, 2);
+        const changes = {};
+        const updated = { ...pokemon };
+        chosen.forEach((key) => {
+            const increase = 3 + Math.floor(Math.random() * 5); // +3..+7
+            changes[key] = increase;
+            updated[key] = pokemon[key] + increase;
+        });
+        return { updated, changes };
+    };
+
+    const continueFromStatBoost = () => {
+        setStatBoostInfo(null);
+        setPhase('challenge-lobby');
+    };
+
     const continueAfterStageResult = async () => {
         winnerRef.current = null;
-
-        const healedHp = team.map((p) => battleMaxHp(p));
-        teamHpRef.current = healedHp;
-        setTeamHp(healedHp);
-        activeIndexRef.current = 0;
-        setActiveIndex(0);
 
         if (stageOutcome === 'won') {
             setLastOutcome('won');
             setStageOutcome(null);
 
             if (winCountRef.current % DROP_EVERY_N_WINS === 0) {
+                const healedHp = team.map((p) => battleMaxHp(p));
+                teamHpRef.current = healedHp;
+                setTeamHp(healedHp);
+                activeIndexRef.current = 0;
+                setActiveIndex(0);
+
                 setPhase('loading');
                 await triggerGacha();
                 return;
             }
-        } else {
-            setLastOutcome('lost');
-            setStageOutcome(null);
+
+            // Kemenangan non-gacha: dapat bonus stat acak
+            const idx = pickWeightedWeakest(team);
+            const { updated, changes } = applyRandomStatBoost(team[idx]);
+            const newTeam = [...team];
+            newTeam[idx] = updated;
+            setTeam(newTeam);
+
+            const healedHp = newTeam.map((p) => battleMaxHp(p));
+            teamHpRef.current = healedHp;
+            setTeamHp(healedHp);
+            activeIndexRef.current = 0;
+            setActiveIndex(0);
+
+            setStatBoostInfo({ pokemon: updated, changes });
+            setPhase('stat-boost');
+            return;
         }
+
+        setLastOutcome('lost');
+        setStageOutcome(null);
+
+        const healedHp = team.map((p) => battleMaxHp(p));
+        teamHpRef.current = healedHp;
+        setTeamHp(healedHp);
+        activeIndexRef.current = 0;
+        setActiveIndex(0);
 
         setPhase('challenge-lobby');
     };
@@ -771,6 +835,14 @@ export default function Battle({ totalPokemon }) {
                         team={team}
                         onReplace={replaceWithDrop}
                         onSkip={skipDrop}
+                    />
+                )}
+
+                {phase === 'stat-boost' && statBoostInfo && (
+                    <StatBoostCard
+                        pokemon={statBoostInfo.pokemon}
+                        changes={statBoostInfo.changes}
+                        onContinue={continueFromStatBoost}
                     />
                 )}
 
