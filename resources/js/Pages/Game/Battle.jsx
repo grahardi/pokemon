@@ -671,6 +671,33 @@ export default function Battle({ totalPokemon }) {
         setPhase('trainer');
     };
 
+    const resetChallenge = async () => {
+        const confirmed = window.confirm(
+            '⚠️ Reset Challenge?\n\nProgres level, tim, dan total kemenanganmu akan hilang. Kamu akan mulai lagi dari pilih Pokemon seperti pertama main. Tindakan ini tidak bisa dibatalkan.'
+        );
+        if (!confirmed) return;
+
+        setPhase('loading');
+        try {
+            const res = await fetch('/api/tarung/random?count=6&evolvable_only=1');
+            setChoices(await res.json());
+            setTeamSelection([]);
+            setTeam([]);
+            setTeamHp([]);
+            setLevelIndex(0);
+            setClearedLevels([]);
+            winCountRef.current = 0;
+            setWinCount(0);
+            setLastOutcome(null);
+            cooldownsRef.current = {};
+            setCooldowns({});
+            setPhase('team-select');
+        } catch (e) {
+            setError('Gagal reset. Coba lagi.');
+            setPhase('challenge-lobby');
+        }
+    };
+
     const activePlayer = team[activeIndex];
     const activePlayerHp = teamHp[activeIndex] ?? 0;
     const activeBot = botTeam[botActiveIndex];
@@ -798,9 +825,14 @@ export default function Battle({ totalPokemon }) {
 
                         <LevelTrack levels={CHALLENGE_LEVELS} clearedLevels={clearedLevels} onSelectLevel={startLevelFight} />
 
-                        <button onClick={backToStart} className="w-full mt-4 bg-slate-100 hover:bg-slate-200 text-slate-600 font-semibold py-2.5 rounded-lg text-sm">
-                            Keluar dari Challenge
-                        </button>
+                        <div className="grid grid-cols-2 gap-2 mt-4">
+                            <button onClick={resetChallenge} className="bg-red-50 hover:bg-red-100 text-red-600 font-semibold py-2.5 rounded-lg text-sm">
+                                🔄 Reset Challenge
+                            </button>
+                            <button onClick={backToStart} className="bg-slate-100 hover:bg-slate-200 text-slate-600 font-semibold py-2.5 rounded-lg text-sm">
+                                Keluar dari Challenge
+                            </button>
+                        </div>
                     </div>
                 )}
 
