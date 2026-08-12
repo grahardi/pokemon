@@ -196,6 +196,9 @@ export default function Battle({ totalPokemon }) {
             setBotActiveIndex(0);
             setRivalTrainer(null);
 
+            cooldownsRef.current = {};
+            setCooldowns({});
+
             playBattleStartSound();
             setLog([`Pertarungan dimulai! ${nickname} mengirim ${picked.name}, lawan mengirim ${botPokemon.name}!`]);
             setWinner(null);
@@ -265,6 +268,9 @@ export default function Battle({ totalPokemon }) {
 
             activeIndexRef.current = 0;
             setActiveIndex(0);
+
+            cooldownsRef.current = {};
+            setCooldowns({});
 
             playBattleStartSound();
             setLog([
@@ -537,6 +543,8 @@ export default function Battle({ totalPokemon }) {
 
         activeIndexRef.current = aliveIdx;
         setActiveIndex(aliveIdx);
+        cooldownsRef.current = {};
+        setCooldowns({});
         addLog(`${nickname} mengirim ${team[aliveIdx].name}!`);
     };
 
