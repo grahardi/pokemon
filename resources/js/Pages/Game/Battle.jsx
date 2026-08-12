@@ -418,19 +418,6 @@ export default function Battle({ totalPokemon }) {
 
     const statTotal = (p) => p.hp + p.attack + p.defense + p.sp_attack + p.sp_defense + p.speed;
 
-    const pickWeightedWeakest = (members) => {
-        const totals = members.map(statTotal);
-        const maxTotal = Math.max(...totals);
-        const weights = totals.map((t) => (maxTotal - t) + 15); // +15 base weight biar semua tetap punya kans
-        const sumWeights = weights.reduce((a, b) => a + b, 0);
-        let r = Math.random() * sumWeights;
-        for (let i = 0; i < weights.length; i++) {
-            r -= weights[i];
-            if (r <= 0) return i;
-        }
-        return weights.length - 1;
-    };
-
     const applyRandomStatBoost = (pokemon) => {
         const statKeys = ['hp', 'attack', 'defense', 'sp_attack', 'sp_defense', 'speed'];
         const shuffled = [...statKeys].sort(() => Math.random() - 0.5);
@@ -448,6 +435,22 @@ export default function Battle({ totalPokemon }) {
     const continueFromStatBoost = () => {
         setStatBoostInfo(null);
         setPhase('challenge-lobby');
+    };
+
+    const pickPokemonForBoost = (idx) => {
+        const { updated, changes } = applyRandomStatBoost(team[idx]);
+        const newTeam = [...team];
+        newTeam[idx] = updated;
+        setTeam(newTeam);
+
+        const healedHp = newTeam.map((p) => battleMaxHp(p));
+        teamHpRef.current = healedHp;
+        setTeamHp(healedHp);
+        activeIndexRef.current = 0;
+        setActiveIndex(0);
+
+        setStatBoostInfo({ pokemon: updated, changes });
+        setPhase('stat-boost');
     };
 
     const continueAfterStageResult = async () => {
@@ -469,21 +472,14 @@ export default function Battle({ totalPokemon }) {
                 return;
             }
 
-            // Kemenangan non-gacha: dapat bonus stat acak
-            const idx = pickWeightedWeakest(team);
-            const { updated, changes } = applyRandomStatBoost(team[idx]);
-            const newTeam = [...team];
-            newTeam[idx] = updated;
-            setTeam(newTeam);
-
-            const healedHp = newTeam.map((p) => battleMaxHp(p));
+            // Kemenangan non-gacha: pemain pilih sendiri Pokemon yang mau naik stat
+            const healedHp = team.map((p) => battleMaxHp(p));
             teamHpRef.current = healedHp;
             setTeamHp(healedHp);
             activeIndexRef.current = 0;
             setActiveIndex(0);
 
-            setStatBoostInfo({ pokemon: updated, changes });
-            setPhase('stat-boost');
+            setPhase('stat-boost-pick');
             return;
         }
 
@@ -836,6 +832,25 @@ export default function Battle({ totalPokemon }) {
                         onReplace={replaceWithDrop}
                         onSkip={skipDrop}
                     />
+                )}
+
+                {phase === 'stat-boost-pick' && (
+                    <div className="max-w-lg mx-auto text-center">
+                        <h2 className="text-xl font-bold mb-1">🎉 Menang! Pilih Pokemon buat naik stat</h2>
+                        <p className="text-slate-500 text-sm mb-6">2 stat acak bakal naik +3~7 untuk Pokemon yang kamu pilih.</p>
+                        <div className="grid grid-cols-3 gap-4">
+                            {team.map((p, i) => (
+                                <button
+                                    key={p.id}
+                                    onClick={() => pickPokemonForBoost(i)}
+                                    className="bg-white rounded-xl shadow p-4 text-center hover:-translate-y-1 hover:shadow-lg transition-all border-2 border-transparent hover:border-sky-400"
+                                >
+                                    <img src={p.image} alt={p.name} className="w-16 h-16 object-contain mx-auto" />
+                                    <div className="text-sm font-semibold text-slate-700 mt-1">{p.name}</div>
+                                </button>
+                            ))}
+                        </div>
+                    </div>
                 )}
 
                 {phase === 'stat-boost' && statBoostInfo && (
